@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'service_id' => env('APP_SERVICE_ID', 'notification-service'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment
