@@ -19,6 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        if ($this->app->runningInConsole()) {
+            return;
+        }
+
+        $token = config('auth.api_token');
+
+        if ($token === null || $token === '') {
+            throw new \RuntimeException('API_TOKEN is not configured.');
+        }
     }
 }
