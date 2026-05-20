@@ -1,0 +1,16 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - database/
+        - routes/
+        - tests/
+    level: 8
+    excludePaths:
+        - bootstrap/cache/*
+        - storage/*
+    parallel:
+        maximumNumberOfProcesses: 1
+        processTimeout: 300.0
