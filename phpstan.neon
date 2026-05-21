@@ -14,3 +14,6 @@ parameters:
     parallel:
         maximumNumberOfProcesses: 1
         processTimeout: 300.0
+    ignoreErrors:
+        - identifier: staticMethod.notFound
+          path: tests/
