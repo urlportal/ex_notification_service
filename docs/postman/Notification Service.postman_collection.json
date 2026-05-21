@@ -1,0 +1,1373 @@
+{
+  "item": [
+    {
+      "name": "Health",
+      "description": "Health",
+      "item": [
+        {
+          "id": "7573ddf2-c065-4323-94be-ad4f103acc8a",
+          "name": "Проверка работоспособности сервиса",
+          "request": {
+            "name": "Проверка работоспособности сервиса",
+            "description": {
+              "content": "Возвращает статус сервиса. Не требует авторизации.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "health",
+                "live"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [],
+              "raw": "{{base_url}}/api/health/live"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {},
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "3ff8136f-0a63-4304-8738-da34470573ab",
+              "name": "Сервис работает",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "health",
+                    "live"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": \"pass\",\n  \"version\": \"1.0.0\",\n  \"serviceId\": \"notification-service\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscribers",
+      "description": "Subscribers",
+      "item": [
+        {
+          "id": "74d94829-310d-4975-8538-c4e3cf880c2a",
+          "name": "Получить подписчика по UUID",
+          "request": {
+            "name": "Получить подписчика по UUID",
+            "description": {
+              "content": "Возвращает данные конкретного подписчика по его UUID.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "subscribers",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                  "key": "id",
+                  "disabled": false,
+                  "description": {
+                    "content": "(Required) UUID подписчика",
+                    "type": "text/plain"
+                  }
+                }
+              ],
+              "raw": "{{base_url}}/api/v1/subscribers/:id"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {},
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "90fa8c7d-0530-443a-a59c-535394f867e3",
+              "name": "Данные подписчика",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n    \"created_at\": \"2026-05-21T10:00:00.000000Z\",\n    \"updated_at\": \"2026-05-21T10:00:00.000000Z\",\n    \"name\": \"Иван Петров\",\n    \"phone\": \"+79001234567\",\n    \"email\": \"ivan@example.com\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "93208da8-a863-4885-9319-e4bf09186a53",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "e264aced-bea1-4048-bda6-c847c95db7ff",
+              "name": "Подписчик не найден",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Resource not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "ccb605b2-3447-4bdf-a65e-b3cc73045f30",
+          "name": "Удалить подписчика",
+          "request": {
+            "name": "Удалить подписчика",
+            "description": {
+              "content": "Удаляет подписчика по его UUID",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "subscribers",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                  "key": "id",
+                  "disabled": false,
+                  "description": {
+                    "content": "(Required) UUID подписчика",
+                    "type": "text/plain"
+                  }
+                }
+              ],
+              "raw": "{{base_url}}/api/v1/subscribers/:id"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "DELETE",
+            "body": {},
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "a7ca1c4d-94ee-4cb7-9424-501523f33396",
+              "name": "Подписчик удалён",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "d6fae079-522b-44d7-aae7-69ab65629da9",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "2271431d-fa0c-4116-a19e-c4a1b13ec21f",
+              "name": "Подписчик не найден",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "DELETE",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Resource not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "dece0b0a-7d63-46b4-8709-2478db39a510",
+          "name": "Частичное обновление подписчика",
+          "request": {
+            "name": "Частичное обновление подписчика",
+            "description": {
+              "content": "Обновляет указанные поля подписчика (PATCH). Итоговое состояние должно содержать хотя бы одно из phone или email.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "subscribers",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                  "key": "id",
+                  "disabled": false,
+                  "description": {
+                    "content": "(Required) UUID подписчика",
+                    "type": "text/plain"
+                  }
+                }
+              ],
+              "raw": "{{base_url}}/api/v1/subscribers/:id"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Пётр Петров\",\n  \"phone\": \"+79009876543\",\n  \"email\": \"petr@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "5cba42eb-9bb6-4ff7-8ff3-54d47f363e87",
+              "name": "Подписчик обновлён",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Пётр Петров\",\n  \"phone\": \"+79009876543\",\n  \"email\": \"petr@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n    \"created_at\": \"2026-05-21T10:00:00.000000Z\",\n    \"updated_at\": \"2026-05-21T10:00:00.000000Z\",\n    \"name\": \"Иван Петров\",\n    \"phone\": \"+79001234567\",\n    \"email\": \"ivan@example.com\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "326484c2-a146-410d-bc83-ac8929a5790a",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Пётр Петров\",\n  \"phone\": \"+79009876543\",\n  \"email\": \"petr@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b81c5cb4-8486-46fc-8c80-2d2a6c8a2ca3",
+              "name": "Подписчик не найден",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Пётр Петров\",\n  \"phone\": \"+79009876543\",\n  \"email\": \"petr@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Resource not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b34df834-de01-4008-9d25-fb8704b6b6a7",
+              "name": "Ошибка валидации",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "PATCH",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Пётр Петров\",\n  \"phone\": \"+79009876543\",\n  \"email\": \"petr@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_1\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_2\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_3\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_4\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "e67ad712-f528-4b94-8708-65bb70a38543",
+          "name": "Получить список подписчиков",
+          "request": {
+            "name": "Получить список подписчиков",
+            "description": {
+              "content": "Возвращает постраничный список подписчиков с возможностью фильтрации по номеру телефона и email.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "subscribers"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "disabled": true,
+                  "description": {
+                    "content": "Фильтр по номеру телефона (точное совпадение)",
+                    "type": "text/plain"
+                  },
+                  "key": "phone",
+                  "value": "+79001234567"
+                },
+                {
+                  "disabled": true,
+                  "description": {
+                    "content": "Фильтр по email-адресу (точное совпадение)",
+                    "type": "text/plain"
+                  },
+                  "key": "email",
+                  "value": "ivan@example.com"
+                },
+                {
+                  "disabled": true,
+                  "description": {
+                    "content": "Номер страницы",
+                    "type": "text/plain"
+                  },
+                  "key": "page",
+                  "value": "1"
+                }
+              ],
+              "variable": [],
+              "raw": "{{base_url}}/api/v1/subscribers"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {},
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "3f8ee2a5-d9f3-4450-b0ed-06c37d591dc3",
+              "name": "Список подписчиков",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по номеру телефона (точное совпадение)",
+                        "type": "text/plain"
+                      },
+                      "key": "phone",
+                      "value": "+79001234567"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по email-адресу (точное совпадение)",
+                        "type": "text/plain"
+                      },
+                      "key": "email",
+                      "value": "ivan@example.com"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Номер страницы",
+                        "type": "text/plain"
+                      },
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n      \"created_at\": \"2026-05-21T10:00:00.000000Z\",\n      \"updated_at\": \"2026-05-21T10:00:00.000000Z\",\n      \"name\": \"Иван Петров\",\n      \"phone\": \"+79001234567\",\n      \"email\": \"ivan@example.com\"\n    },\n    {\n      \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n      \"created_at\": \"2026-05-21T10:00:00.000000Z\",\n      \"updated_at\": \"2026-05-21T10:00:00.000000Z\",\n      \"name\": \"Иван Петров\",\n      \"phone\": \"+79001234567\",\n      \"email\": \"ivan@example.com\"\n    }\n  ],\n  \"links\": {\n    \"first\": \"http://localhost:8080/api/v1/subscribers?page=1\",\n    \"last\": \"http://localhost:8080/api/v1/subscribers?page=1\",\n    \"prev\": null,\n    \"next\": null\n  },\n  \"meta\": {\n    \"current_page\": 1,\n    \"last_page\": 1,\n    \"per_page\": 15,\n    \"total\": 1,\n    \"path\": \"http://localhost:8080/api/v1/subscribers\",\n    \"from\": 1,\n    \"links\": [\n      {\n        \"url\": \"string\",\n        \"label\": \"1\",\n        \"active\": true\n      },\n      {\n        \"url\": \"string\",\n        \"label\": \"1\",\n        \"active\": true\n      }\n    ],\n    \"to\": 1\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "d597ee41-80c0-49ed-b264-efac16f9c1be",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по номеру телефона (точное совпадение)",
+                        "type": "text/plain"
+                      },
+                      "key": "phone",
+                      "value": "+79001234567"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по email-адресу (точное совпадение)",
+                        "type": "text/plain"
+                      },
+                      "key": "email",
+                      "value": "ivan@example.com"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Номер страницы",
+                        "type": "text/plain"
+                      },
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "969481e2-059d-46c3-b4a0-54c1d6e0e5fe",
+          "name": "Создать подписчика",
+          "request": {
+            "name": "Создать подписчика",
+            "description": {
+              "content": "Создаёт нового подписчика. Хотя бы одно из полей phone или email обязательно.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "subscribers"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [],
+              "raw": "{{base_url}}/api/v1/subscribers"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Иван Петров\",\n  \"phone\": \"+79001234567\",\n  \"email\": \"ivan@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "2387e28d-d0e6-47d1-a307-d77be6bccfe4",
+              "name": "Подписчик создан",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Иван Петров\",\n  \"phone\": \"+79001234567\",\n  \"email\": \"ivan@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n    \"created_at\": \"2026-05-21T10:00:00.000000Z\",\n    \"updated_at\": \"2026-05-21T10:00:00.000000Z\",\n    \"name\": \"Иван Петров\",\n    \"phone\": \"+79001234567\",\n    \"email\": \"ivan@example.com\"\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "dcf01825-a7ec-42bf-aad6-f318d1b20c62",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Иван Петров\",\n  \"phone\": \"+79001234567\",\n  \"email\": \"ivan@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a729734b-3696-4dd4-ba00-b37e25691039",
+              "name": "Ошибка валидации",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Иван Петров\",\n  \"phone\": \"+79001234567\",\n  \"email\": \"ivan@example.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_1\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_2\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_3\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_4\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "scheme",
+      "value": "http"
+    },
+    {
+      "key": "host",
+      "value": "localhost:8080"
+    },
+    {
+      "key": "baseUrl",
+      "value": "{{scheme}}://{{host}}"
+    }
+  ],
+  "info": {
+    "_postman_id": "7bdb70c5-111f-4bcf-a0e6-5917d19ef47a",
+    "name": "Notification Service API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "REST API сервис уведомлений",
+      "type": "text/plain"
+    }
+  }
+}

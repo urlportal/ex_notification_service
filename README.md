@@ -2,6 +2,8 @@
 
 REST API сервис для отправки уведомлений.
 
+---
+
 ## Локальная разработка
 
 ### Быстрый старт
@@ -53,3 +55,35 @@ REST API сервис для отправки уведомлений.
     ```bash
     docker compose down
     ```
+
+### Документация
+
+---
+
+#### Swagger
+
+Swagger работает только вне production-окружения (`APP_ENV` не равно `'production'`).
+
+- Swagger UI: http://localhost:8080/api/documentation
+- OpenAPI JSON: http://localhost:8080/api/openapi.json
+
+Команда регенерации спецификации:
+```bash
+docker compose exec -it php bash -c "php artisan l5-swagger:generate"
+```
+
+---
+
+#### Есть готовые Postman коллекции
+
+1. Откройте Postman. Выберите в самом верхнем меню `File`, потом `Import`.
+2. Выберите сразу 2 файла из директории `docs/postman/` в проекте:
+   - `Notification Service.postman_collection.json` - коллекция запросов.
+   - `Notification Service.postman_environment.json` - переменные окружения.
+3. После того, как у вас появится коллекция `Notification Service` в левом сайдбаре, 
+выберите её и справа сверху в выпадающем списке (будет написано `No environment`) выберите
+`Notification Service` (название набора переменных окружения такое же). После этого 
+переменные добавятся к запросам.
+4. Значение переменной `api_token` (`.env` > `API_TOKEN`) уже добавлено от dev версии 
+(`.env.example` > `API_TOKEN`), поэтому вам ничего делать не нужно, если только 
+вы не поставили в `.env` свой токен. Если так, то установите его в environment `Notification Service`

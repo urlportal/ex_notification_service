@@ -1,0 +1,704 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Notification Service API",
+        "description": "REST API сервис уведомлений",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "{scheme}://{host}",
+            "description": "Сервер API (можете изменить значение домена)",
+            "variables": {
+                "scheme": {
+                    "enum": [
+                        "http",
+                        "https"
+                    ],
+                    "default": "http"
+                },
+                "host": {
+                    "default": "localhost:8080",
+                    "description": "Хост и порт (например, example.com)"
+                }
+            }
+        }
+    ],
+    "paths": {
+        "/api/health/live": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Проверка работоспособности сервиса",
+                "description": "Возвращает статус сервиса. Не требует авторизации.",
+                "operationId": "efcea8db5348b0fc5413772b6639c20a",
+                "responses": {
+                    "200": {
+                        "description": "Сервис работает",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LivenessResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/subscribers/{id}": {
+            "get": {
+                "tags": [
+                    "Subscribers"
+                ],
+                "summary": "Получить подписчика по UUID",
+                "description": "Возвращает данные конкретного подписчика по его UUID.",
+                "operationId": "13f00a61b22273e8a3689e09992f0959",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "UUID подписчика",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "019600a2-7c3b-7000-9f3b-1234567890ab"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные подписчика",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/SubscriberResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Подписчик не найден",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Subscribers"
+                ],
+                "summary": "Удалить подписчика",
+                "description": "Удаляет подписчика по его UUID",
+                "operationId": "d5347d2b6a46f5ec8538b4a913232bb2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "UUID подписчика",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "019600a2-7c3b-7000-9f3b-1234567890ab"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Подписчик удалён"
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Подписчик не найден",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "patch": {
+                "tags": [
+                    "Subscribers"
+                ],
+                "summary": "Частичное обновление подписчика",
+                "description": "Обновляет указанные поля подписчика (PATCH). Итоговое состояние должно содержать хотя бы одно из phone или email.",
+                "operationId": "be989639387acab4d52d63f7db687fbb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "UUID подписчика",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "019600a2-7c3b-7000-9f3b-1234567890ab"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateSubscriberRequest"
+                            },
+                            "example": {
+                                "name": "Пётр Петров",
+                                "phone": "+79009876543",
+                                "email": "petr@example.com"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Подписчик обновлён",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/SubscriberResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Подписчик не найден",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/subscribers": {
+            "get": {
+                "tags": [
+                    "Subscribers"
+                ],
+                "summary": "Получить список подписчиков",
+                "description": "Возвращает постраничный список подписчиков с возможностью фильтрации по номеру телефона и email.",
+                "operationId": "24c988d03ce0a743fe5e7e624c4fce72",
+                "parameters": [
+                    {
+                        "name": "phone",
+                        "in": "query",
+                        "description": "Фильтр по номеру телефона (точное совпадение)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "+79001234567"
+                        }
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "Фильтр по email-адресу (точное совпадение)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "email",
+                            "example": "ivan@example.com"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1,
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список подписчиков",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedSubscribers"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Subscribers"
+                ],
+                "summary": "Создать подписчика",
+                "description": "Создаёт нового подписчика. Хотя бы одно из полей phone или email обязательно.",
+                "operationId": "ed69a746799cc705d7437ced95c89ace",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreSubscriberRequest"
+                            },
+                            "example": {
+                                "name": "Иван Петров",
+                                "phone": "+79001234567",
+                                "email": "ivan@example.com"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Подписчик создан",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/SubscriberResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UnauthorizedResponse": {
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Unauthenticated"
+                    }
+                },
+                "type": "object"
+            },
+            "NotFoundResponse": {
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Resource not found"
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationErrorResponse": {
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "description": "Ключ является названием поля, а значение массивом строк с ошибками",
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "LivenessResponse": {
+                "required": [
+                    "status",
+                    "version",
+                    "serviceId"
+                ],
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "example": "pass"
+                    },
+                    "version": {
+                        "type": "string",
+                        "example": "1.0.0"
+                    },
+                    "serviceId": {
+                        "type": "string",
+                        "example": "notification-service"
+                    }
+                },
+                "type": "object"
+            },
+            "SubscriberResource": {
+                "required": [
+                    "id",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "UUID",
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "019600a2-7c3b-7000-9f3b-1234567890ab"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Иван Петров",
+                        "nullable": true,
+                        "maxLength": 120
+                    },
+                    "phone": {
+                        "description": "Начинается с +, затем цифры",
+                        "type": "string",
+                        "pattern": "^\\+[1-9]\\d{6,14}$",
+                        "example": "+79001234567",
+                        "nullable": true,
+                        "maxLength": 32
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "ivan@example.com",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-05-21T10:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-05-21T10:00:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationLinks": {
+                "properties": {
+                    "first": {
+                        "type": "string",
+                        "example": "http://localhost:8080/api/v1/subscribers?page=1",
+                        "nullable": true
+                    },
+                    "last": {
+                        "type": "string",
+                        "example": "http://localhost:8080/api/v1/subscribers?page=1",
+                        "nullable": true
+                    },
+                    "prev": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "next": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaginationMeta": {
+                "required": [
+                    "current_page",
+                    "last_page",
+                    "per_page",
+                    "total",
+                    "path"
+                ],
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "from": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "url": {
+                                    "type": "string",
+                                    "nullable": true
+                                },
+                                "label": {
+                                    "type": "string",
+                                    "example": "1"
+                                },
+                                "active": {
+                                    "type": "boolean",
+                                    "example": true
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "http://localhost:8080/api/v1/subscribers"
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "to": {
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedSubscribers": {
+                "required": [
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubscriberResource"
+                        }
+                    },
+                    "links": {
+                        "$ref": "#/components/schemas/PaginationLinks"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "type": "object"
+            },
+            "StoreSubscriberRequest": {
+                "description": "Тело запроса для создания подписчика. Хотя бы одно из полей phone или email обязательно.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Иван Петров",
+                        "nullable": true,
+                        "maxLength": 120
+                    },
+                    "phone": {
+                        "description": "Начинается с +, затем цифры. Обязателен, если не указан email.",
+                        "type": "string",
+                        "pattern": "^\\+[1-9]\\d{6,14}$",
+                        "example": "+79001234567",
+                        "nullable": true,
+                        "maxLength": 32
+                    },
+                    "email": {
+                        "description": "Обязателен, если не указан phone.",
+                        "type": "string",
+                        "format": "email",
+                        "example": "ivan@example.com",
+                        "nullable": true,
+                        "maxLength": 255
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "name": "Иван Петров",
+                    "phone": "+79001234567",
+                    "email": "ivan@example.com"
+                }
+            },
+            "UpdateSubscriberRequest": {
+                "description": "Тело запроса для частичного обновления подписчика (PATCH). Передаются только изменяемые поля. Итоговое состояние должно содержать хотя бы одно из phone или email.",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Иван Иванов",
+                        "nullable": true,
+                        "maxLength": 120
+                    },
+                    "phone": {
+                        "description": "Новый телефон. Начинается с +, затем цифры.",
+                        "type": "string",
+                        "pattern": "^\\+[1-9]\\d{6,14}$",
+                        "example": "+79001234567",
+                        "nullable": true,
+                        "maxLength": 32
+                    },
+                    "email": {
+                        "description": "Новый email-адрес.",
+                        "type": "string",
+                        "format": "email",
+                        "example": "ivan@example.com",
+                        "nullable": true,
+                        "maxLength": 255
+                    }
+                },
+                "type": "object",
+                "example": {
+                    "name": "Пётр Петров",
+                    "phone": "+79009876543",
+                    "email": "petr@example.com"
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Статический Bearer-токен (см. API_TOKEN в конфиге)",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Health",
+            "description": "Health"
+        },
+        {
+            "name": "Subscribers",
+            "description": "Subscribers"
+        }
+    ]
+}

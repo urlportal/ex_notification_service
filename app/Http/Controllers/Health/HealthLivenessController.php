@@ -6,7 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Http\DTO\Health\LivenessResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use OpenApi\Attributes as OA;
 
+#[OA\Get(
+    path: '/api/health/live',
+    description: 'Возвращает статус сервиса. Не требует авторизации.',
+    summary: 'Проверка работоспособности сервиса',
+    tags: ['Health'],
+    responses: [
+        new OA\Response(
+            response: 200,
+            description: 'Сервис работает',
+            content: new OA\JsonContent(ref: '#/components/schemas/LivenessResponse')
+        ),
+    ]
+)]
 class HealthLivenessController extends Controller
 {
     public function __invoke(): JsonResponse
