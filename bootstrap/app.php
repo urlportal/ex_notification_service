@@ -3,6 +3,7 @@
 use App\Exceptions\AlreadyExistsException;
 use App\Exceptions\NotFoundException;
 use App\Http\Middleware\ApiTokenAuth;
+use App\Http\Middleware\EnsureNotProduction;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'api.token' => ApiTokenAuth::class,
+            'not.production' => EnsureNotProduction::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
