@@ -5,7 +5,7 @@
       "description": "Health",
       "item": [
         {
-          "id": "7573ddf2-c065-4323-94be-ad4f103acc8a",
+          "id": "9a8003c6-4197-403d-888c-180e1609b975",
           "name": "Проверка работоспособности сервиса",
           "request": {
             "name": "Проверка работоспособности сервиса",
@@ -38,7 +38,7 @@
           },
           "response": [
             {
-              "id": "3ff8136f-0a63-4304-8738-da34470573ab",
+              "id": "c8249098-bfa3-4f1b-80f8-10d616138806",
               "name": "Сервис работает",
               "originalRequest": {
                 "url": {
@@ -83,11 +83,769 @@
       ]
     },
     {
+      "name": "Notifications",
+      "description": "Notifications",
+      "item": [
+        {
+          "id": "ddb96349-d6fb-48b9-8a2c-8f058eaaace2",
+          "name": "Получить уведомления подписчика",
+          "request": {
+            "name": "Получить уведомления подписчика",
+            "description": {
+              "content": "Возвращает постраничный список уведомлений подписчика с опциональной фильтрацией по статусу, каналу и приоритету.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "subscribers",
+                ":id",
+                "notifications"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [
+                {
+                  "disabled": false,
+                  "description": {
+                    "content": "Фильтр по статусу (одно значение) (This can only be one of queued,sent,delivered,dropped)",
+                    "type": "text/plain"
+                  },
+                  "key": "status",
+                  "value": "sent"
+                },
+                {
+                  "disabled": false,
+                  "description": {
+                    "content": "Фильтр по каналу (одно значение) (This can only be one of sms,email)",
+                    "type": "text/plain"
+                  },
+                  "key": "channel",
+                  "value": "email"
+                },
+                {
+                  "disabled": false,
+                  "description": {
+                    "content": "Фильтр по приоритету (одно значение) (This can only be one of transactional,marketing)",
+                    "type": "text/plain"
+                  },
+                  "key": "priority",
+                  "value": "transactional"
+                },
+                {
+                  "disabled": false,
+                  "description": {
+                    "content": "Количество записей на странице (1–100)",
+                    "type": "text/plain"
+                  },
+                  "key": "per_page",
+                  "value": "15"
+                },
+                {
+                  "disabled": false,
+                  "description": {
+                    "content": "Номер страницы",
+                    "type": "text/plain"
+                  },
+                  "key": "page",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "type": "any",
+                  "value": "019600a2-7c3b-7000-9f3b-000000000001",
+                  "key": "id",
+                  "disabled": false,
+                  "description": {
+                    "content": "(Required) UUID подписчика",
+                    "type": "text/plain"
+                  }
+                }
+              ],
+              "raw": "{{base_url}}/api/v1/subscribers/:id/notifications?status=sent&channel=email&priority=transactional&per_page=15&page=1"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {},
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "44b8fb74-8c15-4982-8c08-9af86400bad7",
+              "name": "Список уведомлений",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id",
+                    "notifications"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по статусу (одно значение) (This can only be one of queued,sent,delivered,dropped)",
+                        "type": "text/plain"
+                      },
+                      "key": "status",
+                      "value": "sent"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по каналу (одно значение) (This can only be one of sms,email)",
+                        "type": "text/plain"
+                      },
+                      "key": "channel",
+                      "value": "email"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по приоритету (одно значение) (This can only be one of transactional,marketing)",
+                        "type": "text/plain"
+                      },
+                      "key": "priority",
+                      "value": "transactional"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Количество записей на странице (1–100)",
+                        "type": "text/plain"
+                      },
+                      "key": "per_page",
+                      "value": "15"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Номер страницы",
+                        "type": "text/plain"
+                      },
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-000000000001",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n      \"subscriber_id\": \"019600a2-7c3b-7000-9f3b-000000000001\",\n      \"channel\": \"email\",\n      \"priority\": \"transactional\",\n      \"status\": \"delivered\",\n      \"message\": \"Ваш заказ подтверждён\",\n      \"attempts\": 1,\n      \"created_at\": \"2026-05-22T10:00:00.000000Z\",\n      \"updated_at\": \"2026-05-22T10:00:05.000000Z\",\n      \"bulk_request_id\": null,\n      \"last_error\": null,\n      \"idempotency_key\": null,\n      \"provider_message_id\": \"msg_abc123\",\n      \"queued_at\": \"2026-05-22T10:00:00.000000Z\",\n      \"sent_at\": \"2026-05-22T10:00:01.000000Z\",\n      \"delivered_at\": \"2026-05-22T10:00:05.000000Z\",\n      \"dropped_at\": null\n    },\n    {\n      \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n      \"subscriber_id\": \"019600a2-7c3b-7000-9f3b-000000000001\",\n      \"channel\": \"email\",\n      \"priority\": \"transactional\",\n      \"status\": \"delivered\",\n      \"message\": \"Ваш заказ подтверждён\",\n      \"attempts\": 1,\n      \"created_at\": \"2026-05-22T10:00:00.000000Z\",\n      \"updated_at\": \"2026-05-22T10:00:05.000000Z\",\n      \"bulk_request_id\": null,\n      \"last_error\": null,\n      \"idempotency_key\": null,\n      \"provider_message_id\": \"msg_abc123\",\n      \"queued_at\": \"2026-05-22T10:00:00.000000Z\",\n      \"sent_at\": \"2026-05-22T10:00:01.000000Z\",\n      \"delivered_at\": \"2026-05-22T10:00:05.000000Z\",\n      \"dropped_at\": null\n    }\n  ],\n  \"links\": {\n    \"first\": \"http://localhost:8080/api/v1/subscribers?page=1\",\n    \"last\": \"http://localhost:8080/api/v1/subscribers?page=1\",\n    \"prev\": null,\n    \"next\": null\n  },\n  \"meta\": {\n    \"current_page\": 1,\n    \"last_page\": 1,\n    \"per_page\": 15,\n    \"total\": 1,\n    \"path\": \"http://localhost:8080/api/v1/subscribers\",\n    \"from\": 1,\n    \"links\": [\n      {\n        \"url\": \"string\",\n        \"label\": \"1\",\n        \"active\": true\n      },\n      {\n        \"url\": \"string\",\n        \"label\": \"1\",\n        \"active\": true\n      }\n    ],\n    \"to\": 1\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "bd0b5390-bd05-441e-867a-aedb99eeacd1",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id",
+                    "notifications"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по статусу (одно значение) (This can only be one of queued,sent,delivered,dropped)",
+                        "type": "text/plain"
+                      },
+                      "key": "status",
+                      "value": "sent"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по каналу (одно значение) (This can only be one of sms,email)",
+                        "type": "text/plain"
+                      },
+                      "key": "channel",
+                      "value": "email"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по приоритету (одно значение) (This can only be one of transactional,marketing)",
+                        "type": "text/plain"
+                      },
+                      "key": "priority",
+                      "value": "transactional"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Количество записей на странице (1–100)",
+                        "type": "text/plain"
+                      },
+                      "key": "per_page",
+                      "value": "15"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Номер страницы",
+                        "type": "text/plain"
+                      },
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-000000000001",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b4ec7c04-80b2-4d82-94a8-f00d35cbffe3",
+              "name": "Подписчик не найден",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id",
+                    "notifications"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по статусу (одно значение) (This can only be one of queued,sent,delivered,dropped)",
+                        "type": "text/plain"
+                      },
+                      "key": "status",
+                      "value": "sent"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по каналу (одно значение) (This can only be one of sms,email)",
+                        "type": "text/plain"
+                      },
+                      "key": "channel",
+                      "value": "email"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по приоритету (одно значение) (This can only be one of transactional,marketing)",
+                        "type": "text/plain"
+                      },
+                      "key": "priority",
+                      "value": "transactional"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Количество записей на странице (1–100)",
+                        "type": "text/plain"
+                      },
+                      "key": "per_page",
+                      "value": "15"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Номер страницы",
+                        "type": "text/plain"
+                      },
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-000000000001",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Resource not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c686b1c6-7c3e-4786-a321-d3dd791d3d13",
+              "name": "Ошибка валидации",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "subscribers",
+                    ":id",
+                    "notifications"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по статусу (одно значение) (This can only be one of queued,sent,delivered,dropped)",
+                        "type": "text/plain"
+                      },
+                      "key": "status",
+                      "value": "sent"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по каналу (одно значение) (This can only be one of sms,email)",
+                        "type": "text/plain"
+                      },
+                      "key": "channel",
+                      "value": "email"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Фильтр по приоритету (одно значение) (This can only be one of transactional,marketing)",
+                        "type": "text/plain"
+                      },
+                      "key": "priority",
+                      "value": "transactional"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Количество записей на странице (1–100)",
+                        "type": "text/plain"
+                      },
+                      "key": "per_page",
+                      "value": "15"
+                    },
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "Номер страницы",
+                        "type": "text/plain"
+                      },
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID подписчика",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-000000000001",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "688b394c-65cb-416c-b1b4-2492c0e58ec2",
+          "name": "Получить уведомление по UUID",
+          "request": {
+            "name": "Получить уведомление по UUID",
+            "description": {
+              "content": "Возвращает полное представление уведомления по его UUID.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                ":id"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                  "key": "id",
+                  "disabled": false,
+                  "description": {
+                    "content": "(Required) UUID уведомления",
+                    "type": "text/plain"
+                  }
+                }
+              ],
+              "raw": "{{base_url}}/api/v1/notifications/:id"
+            },
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {},
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "07c0c3bd-f79f-4414-b62b-e4d60f8d9660",
+              "name": "Данные уведомления",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID уведомления",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"data\": {\n    \"id\": \"019600a2-7c3b-7000-9f3b-1234567890ab\",\n    \"subscriber_id\": \"019600a2-7c3b-7000-9f3b-000000000001\",\n    \"channel\": \"email\",\n    \"priority\": \"transactional\",\n    \"status\": \"delivered\",\n    \"message\": \"Ваш заказ подтверждён\",\n    \"attempts\": 1,\n    \"created_at\": \"2026-05-22T10:00:00.000000Z\",\n    \"updated_at\": \"2026-05-22T10:00:05.000000Z\",\n    \"bulk_request_id\": null,\n    \"last_error\": null,\n    \"idempotency_key\": null,\n    \"provider_message_id\": \"msg_abc123\",\n    \"queued_at\": \"2026-05-22T10:00:00.000000Z\",\n    \"sent_at\": \"2026-05-22T10:00:01.000000Z\",\n    \"delivered_at\": \"2026-05-22T10:00:05.000000Z\",\n    \"dropped_at\": null\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a38a44cb-3fe1-4cbd-afe4-0567bbddec25",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID уведомления",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9376250b-99f9-46a9-9a70-1516653a7ec9",
+              "name": "Уведомление не найдено",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    ":id"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) UUID уведомления",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "019600a2-7c3b-7000-9f3b-1234567890ab",
+                      "key": "id"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "GET",
+                "body": {}
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Resource not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ]
+    },
+    {
       "name": "Subscribers",
       "description": "Subscribers",
       "item": [
         {
-          "id": "74d94829-310d-4975-8538-c4e3cf880c2a",
+          "id": "72fadbff-488e-415b-b280-f3c9f957da35",
           "name": "Получить подписчика по UUID",
           "request": {
             "name": "Получить подписчика по UUID",
@@ -140,7 +898,7 @@
           },
           "response": [
             {
-              "id": "90fa8c7d-0530-443a-a59c-535394f867e3",
+              "id": "2bf957da-fedb-426f-bd42-df95d3de7464",
               "name": "Данные подписчика",
               "originalRequest": {
                 "url": {
@@ -197,7 +955,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "93208da8-a863-4885-9319-e4bf09186a53",
+              "id": "3e4d1305-8b77-4a2d-967f-52635e315e8d",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -254,7 +1012,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "e264aced-bea1-4048-bda6-c847c95db7ff",
+              "id": "862c3723-fb15-4a20-8680-9bdd18a9b13f",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -317,7 +1075,7 @@
           }
         },
         {
-          "id": "ccb605b2-3447-4bdf-a65e-b3cc73045f30",
+          "id": "3e3900b7-2199-4849-b473-da0d2164a674",
           "name": "Удалить подписчика",
           "request": {
             "name": "Удалить подписчика",
@@ -370,7 +1128,7 @@
           },
           "response": [
             {
-              "id": "a7ca1c4d-94ee-4cb7-9424-501523f33396",
+              "id": "e3b3d25d-7a0a-4632-8e6f-ecc7d7d3573b",
               "name": "Подписчик удалён",
               "originalRequest": {
                 "url": {
@@ -417,7 +1175,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "d6fae079-522b-44d7-aae7-69ab65629da9",
+              "id": "042eb6ff-5157-4d90-9a71-458a3d57b0d2",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -474,7 +1232,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "2271431d-fa0c-4116-a19e-c4a1b13ec21f",
+              "id": "e8294c79-a3a7-44e4-a48d-f3b486ba86f3",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -537,7 +1295,7 @@
           }
         },
         {
-          "id": "dece0b0a-7d63-46b4-8709-2478db39a510",
+          "id": "1fe0f071-25c8-4e72-9640-988eca23d6d2",
           "name": "Частичное обновление подписчика",
           "request": {
             "name": "Частичное обновление подписчика",
@@ -603,7 +1361,7 @@
           },
           "response": [
             {
-              "id": "5cba42eb-9bb6-4ff7-8ff3-54d47f363e87",
+              "id": "00c8794b-8e54-4c3d-b5ee-131fb92318e6",
               "name": "Подписчик обновлён",
               "originalRequest": {
                 "url": {
@@ -673,7 +1431,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "326484c2-a146-410d-bc83-ac8929a5790a",
+              "id": "7f260962-39e7-4d29-a0b6-73c048ec3bb0",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -743,7 +1501,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "b81c5cb4-8486-46fc-8c80-2d2a6c8a2ca3",
+              "id": "18b07f76-0e3d-4c3a-b467-133d78773738",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -813,7 +1571,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "b34df834-de01-4008-9d25-fb8704b6b6a7",
+              "id": "3815380d-8844-4922-8313-62463ab86e5d",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -878,7 +1636,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_1\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_2\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_3\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_4\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
+              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             }
@@ -889,7 +1647,7 @@
           }
         },
         {
-          "id": "e67ad712-f528-4b94-8708-65bb70a38543",
+          "id": "2765dd51-4b85-4486-9c49-6aad6e75aed1",
           "name": "Получить список подписчиков",
           "request": {
             "name": "Получить список подписчиков",
@@ -958,7 +1716,7 @@
           },
           "response": [
             {
-              "id": "3f8ee2a5-d9f3-4450-b0ed-06c37d591dc3",
+              "id": "9946f358-0ba1-4543-a822-0464a398f4fd",
               "name": "Список подписчиков",
               "originalRequest": {
                 "url": {
@@ -1031,7 +1789,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "d597ee41-80c0-49ed-b264-efac16f9c1be",
+              "id": "ec0c3d50-8337-478e-827f-7702601948df",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1110,7 +1868,7 @@
           }
         },
         {
-          "id": "969481e2-059d-46c3-b4a0-54c1d6e0e5fe",
+          "id": "24b187ea-ab50-4ec9-9eff-bb59bddc040c",
           "name": "Создать подписчика",
           "request": {
             "name": "Создать подписчика",
@@ -1164,7 +1922,7 @@
           },
           "response": [
             {
-              "id": "2387e28d-d0e6-47d1-a307-d77be6bccfe4",
+              "id": "63c606f2-4f91-434d-8393-e28c68ac06aa",
               "name": "Подписчик создан",
               "originalRequest": {
                 "url": {
@@ -1222,7 +1980,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "dcf01825-a7ec-42bf-aad6-f318d1b20c62",
+              "id": "1fd4f1b3-4625-45fb-8141-18b3410d814f",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1280,7 +2038,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "a729734b-3696-4dd4-ba00-b37e25691039",
+              "id": "43788cbe-6612-4c7c-88ba-12f5a146b2d0",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -1333,7 +2091,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_1\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_2\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_3\": [\n      \"string\",\n      \"string\"\n    ],\n    \"key_4\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
+              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             }
@@ -1362,7 +2120,7 @@
     }
   ],
   "info": {
-    "_postman_id": "7bdb70c5-111f-4bcf-a0e6-5917d19ef47a",
+    "_postman_id": "7011b37d-1d46-4c1a-9704-6166d08dccd2",
     "name": "Notification Service API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {

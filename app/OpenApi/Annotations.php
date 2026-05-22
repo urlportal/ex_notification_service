@@ -166,4 +166,39 @@ use OpenApi\Attributes as OA;
     ],
     example: ['name' => 'Пётр Петров', 'phone' => '+79009876543', 'email' => 'petr@example.com']
 )]
+#[OA\Schema(
+    schema: 'NotificationResource',
+    required: ['id', 'subscriber_id', 'channel', 'priority', 'status', 'message', 'attempts', 'created_at', 'updated_at'],
+    properties: [
+        new OA\Property(property: 'id', type: 'string', format: 'uuid', example: '019600a2-7c3b-7000-9f3b-1234567890ab'),
+        new OA\Property(property: 'subscriber_id', type: 'string', format: 'uuid', example: '019600a2-7c3b-7000-9f3b-000000000001'),
+        new OA\Property(property: 'bulk_request_id', type: 'string', format: 'uuid', nullable: true, example: null),
+        new OA\Property(property: 'channel', type: 'string', enum: ['sms', 'email'], example: 'email'),
+        new OA\Property(property: 'priority', type: 'string', enum: ['transactional', 'marketing'], example: 'transactional'),
+        new OA\Property(property: 'status', type: 'string', enum: ['queued', 'sent', 'delivered', 'dropped'], example: 'delivered'),
+        new OA\Property(property: 'message', type: 'string', example: 'Ваш заказ подтверждён'),
+        new OA\Property(property: 'attempts', type: 'integer', example: 1),
+        new OA\Property(property: 'last_error', type: 'string', nullable: true, example: null),
+        new OA\Property(property: 'idempotency_key', type: 'string', nullable: true, maxLength: 64, example: null),
+        new OA\Property(property: 'provider_message_id', type: 'string', nullable: true, maxLength: 120, example: 'msg_abc123'),
+        new OA\Property(property: 'queued_at', type: 'string', format: 'date-time', nullable: true, example: '2026-05-22T10:00:00.000000Z'),
+        new OA\Property(property: 'sent_at', type: 'string', format: 'date-time', nullable: true, example: '2026-05-22T10:00:01.000000Z'),
+        new OA\Property(property: 'delivered_at', type: 'string', format: 'date-time', nullable: true, example: '2026-05-22T10:00:05.000000Z'),
+        new OA\Property(property: 'dropped_at', type: 'string', format: 'date-time', nullable: true, example: null),
+        new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2026-05-22T10:00:00.000000Z'),
+        new OA\Property(property: 'updated_at', type: 'string', format: 'date-time', example: '2026-05-22T10:00:05.000000Z'),
+    ]
+)]
+#[OA\Schema(
+    schema: 'PaginatedNotifications',
+    required: ['data', 'links', 'meta'],
+    properties: [
+        new OA\Property(
+            property: 'data', type: 'array',
+            items: new OA\Items(ref: '#/components/schemas/NotificationResource')
+        ),
+        new OA\Property(property: 'links', ref: '#/components/schemas/PaginationLinks'),
+        new OA\Property(property: 'meta', ref: '#/components/schemas/PaginationMeta'),
+    ]
+)]
 class Annotations {}

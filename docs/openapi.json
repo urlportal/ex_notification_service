@@ -47,6 +47,210 @@
                 }
             }
         },
+        "/api/v1/subscribers/{id}/notifications": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Получить уведомления подписчика",
+                "description": "Возвращает постраничный список уведомлений подписчика с опциональной фильтрацией по статусу, каналу и приоритету.",
+                "operationId": "cedf964968050efb62e6e3a71a595c1a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "UUID подписчика",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "019600a2-7c3b-7000-9f3b-000000000001"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Фильтр по статусу (одно значение)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "sent",
+                            "enum": [
+                                "queued",
+                                "sent",
+                                "delivered",
+                                "dropped"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "channel",
+                        "in": "query",
+                        "description": "Фильтр по каналу (одно значение)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "email",
+                            "enum": [
+                                "sms",
+                                "email"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "description": "Фильтр по приоритету (одно значение)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "transactional",
+                            "enum": [
+                                "transactional",
+                                "marketing"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Количество записей на странице (1–100)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15,
+                            "default": 15,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1,
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список уведомлений",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedNotifications"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Подписчик не найден",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/notifications/{id}": {
+            "get": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Получить уведомление по UUID",
+                "description": "Возвращает полное представление уведомления по его UUID.",
+                "operationId": "4c1a7701f6e39a0a9272e3d4a8d1ba29",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "UUID уведомления",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "019600a2-7c3b-7000-9f3b-1234567890ab"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Данные уведомления",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/NotificationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Уведомление не найдено",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/subscribers/{id}": {
             "get": {
                 "tags": [
@@ -681,6 +885,145 @@
                     "phone": "+79009876543",
                     "email": "petr@example.com"
                 }
+            },
+            "NotificationResource": {
+                "required": [
+                    "id",
+                    "subscriber_id",
+                    "channel",
+                    "priority",
+                    "status",
+                    "message",
+                    "attempts",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "019600a2-7c3b-7000-9f3b-1234567890ab"
+                    },
+                    "subscriber_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "019600a2-7c3b-7000-9f3b-000000000001"
+                    },
+                    "bulk_request_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "channel": {
+                        "type": "string",
+                        "example": "email",
+                        "enum": [
+                            "sms",
+                            "email"
+                        ]
+                    },
+                    "priority": {
+                        "type": "string",
+                        "example": "transactional",
+                        "enum": [
+                            "transactional",
+                            "marketing"
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "delivered",
+                        "enum": [
+                            "queued",
+                            "sent",
+                            "delivered",
+                            "dropped"
+                        ]
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Ваш заказ подтверждён"
+                    },
+                    "attempts": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "last_error": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "idempotency_key": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true,
+                        "maxLength": 64
+                    },
+                    "provider_message_id": {
+                        "type": "string",
+                        "example": "msg_abc123",
+                        "nullable": true,
+                        "maxLength": 120
+                    },
+                    "queued_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-05-22T10:00:00.000000Z",
+                        "nullable": true
+                    },
+                    "sent_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-05-22T10:00:01.000000Z",
+                        "nullable": true
+                    },
+                    "delivered_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-05-22T10:00:05.000000Z",
+                        "nullable": true
+                    },
+                    "dropped_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-05-22T10:00:00.000000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-05-22T10:00:05.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "PaginatedNotifications": {
+                "required": [
+                    "data",
+                    "links",
+                    "meta"
+                ],
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NotificationResource"
+                        }
+                    },
+                    "links": {
+                        "$ref": "#/components/schemas/PaginationLinks"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "type": "object"
             }
         },
         "securitySchemes": {
@@ -695,6 +1038,10 @@
         {
             "name": "Health",
             "description": "Health"
+        },
+        {
+            "name": "Notifications",
+            "description": "Notifications"
         },
         {
             "name": "Subscribers",

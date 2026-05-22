@@ -17,3 +17,5 @@ parameters:
     ignoreErrors:
         - identifier: staticMethod.notFound
           path: tests/
+        - identifier: missingType.generics
+          path: app/Models/

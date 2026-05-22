@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Health\HealthLivenessController;
+use App\Http\Controllers\Notifications\IndexSubscriberNotificationsController;
+use App\Http\Controllers\Notifications\ShowNotificationController;
 use App\Http\Controllers\Subscribers\DestroySubscriberController;
 use App\Http\Controllers\Subscribers\IndexSubscribersController;
 use App\Http\Controllers\Subscribers\ShowSubscriberController;
@@ -17,5 +19,8 @@ Route::prefix('v1')->group(function () {
         Route::get('/subscribers/{id}', ShowSubscriberController::class);
         Route::patch('/subscribers/{id}', UpdateSubscriberController::class);
         Route::delete('/subscribers/{id}', DestroySubscriberController::class);
+
+        Route::get('/subscribers/{id}/notifications', IndexSubscriberNotificationsController::class);
+        Route::get('/notifications/{id}', ShowNotificationController::class);
     });
 });
