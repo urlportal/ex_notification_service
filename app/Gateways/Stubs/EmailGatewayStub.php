@@ -75,8 +75,6 @@ class EmailGatewayStub implements EmailGatewayInterface
 
     /**
      * Имитирует сетевую задержку провайдера
-     *
-     * @return void
      */
     private function simulateLatency(): void
     {

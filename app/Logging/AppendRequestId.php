@@ -8,6 +8,8 @@ class AppendRequestId
 {
     public function __invoke(Logger $logger): void
     {
-        $logger->getLogger()->pushProcessor(new RequestIdProcessor());
+        /** @var \Monolog\Logger $monolog */
+        $monolog = $logger->getLogger();
+        $monolog->pushProcessor(new RequestIdProcessor);
     }
 }

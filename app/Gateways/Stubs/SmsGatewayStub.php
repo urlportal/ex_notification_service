@@ -75,8 +75,6 @@ class SmsGatewayStub implements SmsGatewayInterface
 
     /**
      * Имитирует сетевую задержку провайдера
-     *
-     * @return void
      */
     private function simulateLatency(): void
     {

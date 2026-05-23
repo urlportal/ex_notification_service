@@ -12,7 +12,7 @@ class AmqpConnectionFactory
 
     public function connection(): AbstractConnection
     {
-        if ($this->connection === null || !$this->connection->isConnected()) {
+        if ($this->connection === null || ! $this->connection->isConnected()) {
             $this->connection = $this->createConnection();
         }
 
@@ -30,12 +30,12 @@ class AmqpConnectionFactory
 
     private function createConnection(): AbstractConnection
     {
-        $host     = config('rabbitmq.host');
-        $port     = config('rabbitmq.port');
-        $user     = config('rabbitmq.user');
+        $host = config('rabbitmq.host');
+        $port = config('rabbitmq.port');
+        $user = config('rabbitmq.user');
         $password = config('rabbitmq.password');
-        $vhost    = config('rabbitmq.vhost');
-        $tls      = config('rabbitmq.tls');
+        $vhost = config('rabbitmq.vhost');
+        $tls = config('rabbitmq.tls');
 
         if ($tls) {
             return new AMQPSSLConnection($host, $port, $user, $password, $vhost);
