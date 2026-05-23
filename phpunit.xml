@@ -40,5 +40,11 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="GATEWAY_STUB_MIN_LATENCY_MS" value="0"/>
         <env name="GATEWAY_STUB_MAX_LATENCY_MS" value="0"/>
+        <env name="RABBITMQ_HOST" value="rabbitmq"/>
+        <env name="RABBITMQ_PORT" value="5672"/>
+        <env name="RABBITMQ_USER" value="guest"/>
+        <env name="RABBITMQ_PASSWORD" value="guest"/>
+        <env name="RABBITMQ_VHOST" value="/"/>
+        <env name="RABBITMQ_TLS" value="false"/>
     </php>
 </phpunit>
