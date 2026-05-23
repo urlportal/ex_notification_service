@@ -24,6 +24,7 @@ class Notification extends Model
         'status',
         'message',
         'idempotency_key',
+        'request_id',
         'provider_message_id',
         'attempts',
         'last_error',

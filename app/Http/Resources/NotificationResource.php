@@ -25,6 +25,7 @@ class NotificationResource extends JsonResource
             'attempts' => $this->resource->attempts,
             'last_error' => $this->resource->last_error,
             'idempotency_key' => $this->resource->idempotency_key,
+            'request_id' => $this->resource->request_id,
             'provider_message_id' => $this->resource->provider_message_id,
             'queued_at' => $this->resource->queued_at,
             'sent_at' => $this->resource->sent_at,
