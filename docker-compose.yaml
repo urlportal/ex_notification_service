@@ -36,6 +36,7 @@ services:
       RABBITMQ_DEFAULT_VHOST: '${RABBITMQ_VHOST:-/}'
     volumes:
       - ./deploy/dev/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./deploy/dev/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', 'ping']
       interval: 10s
