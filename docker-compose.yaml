@@ -34,6 +34,8 @@ services:
       RABBITMQ_DEFAULT_USER: '${RABBITMQ_USER:-guest}'
       RABBITMQ_DEFAULT_PASS: '${RABBITMQ_PASSWORD:-guest}'
       RABBITMQ_DEFAULT_VHOST: '${RABBITMQ_VHOST:-/}'
+    volumes:
+      - ./deploy/dev/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', 'ping']
       interval: 10s

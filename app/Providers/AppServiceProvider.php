@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Logging\RequestIdContext;
+use App\Messaging\AmqpConnectionFactory;
 use App\Repositories\Eloquent\EloquentNotificationRepository;
 use App\Repositories\Eloquent\EloquentSubscriberRepository;
 use App\Repositories\NotificationRepositoryInterface;
@@ -17,6 +19,13 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(SubscriberRepositoryInterface::class, EloquentSubscriberRepository::class);
         $this->app->bind(NotificationRepositoryInterface::class, EloquentNotificationRepository::class);
+
+        $this->app->singleton(RequestIdContext::class);
+        $this->app->singleton(AmqpConnectionFactory::class);
+
+        $this->app->terminating(function (): void {
+            $this->app->make(AmqpConnectionFactory::class)->close();
+        });
     }
 
     /**
