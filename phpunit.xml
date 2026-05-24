@@ -40,6 +40,10 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="GATEWAY_STUB_MIN_LATENCY_MS" value="0"/>
         <env name="GATEWAY_STUB_MAX_LATENCY_MS" value="0"/>
+        <env name="REDIS_CLIENT" value="phpredis"/>
+        <env name="REDIS_HOST" value="redis"/>
+        <env name="REDIS_PORT" value="6379"/>
+        <env name="REDIS_DB" value="1"/>
         <env name="RABBITMQ_HOST" value="rabbitmq"/>
         <env name="RABBITMQ_PORT" value="5672"/>
         <env name="RABBITMQ_USER" value="guest"/>

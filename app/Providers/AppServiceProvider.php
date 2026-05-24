@@ -10,6 +10,7 @@ use App\Repositories\Eloquent\EloquentNotificationRepository;
 use App\Repositories\Eloquent\EloquentSubscriberRepository;
 use App\Repositories\NotificationRepositoryInterface;
 use App\Repositories\SubscriberRepositoryInterface;
+use App\Services\IdempotencyService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +24,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(NotificationRepositoryInterface::class, EloquentNotificationRepository::class);
 
         $this->app->singleton(RequestIdContext::class);
+        $this->app->singleton(IdempotencyService::class, function (): IdempotencyService {
+            return new IdempotencyService((int) config('idempotency.ttl'));
+        });
         $this->app->singleton(AmqpConnectionFactory::class);
         $this->app->singleton(NotificationPublisherInterface::class, AmqpNotificationPublisher::class);
 

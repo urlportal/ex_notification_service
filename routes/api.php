@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Health\HealthLivenessController;
+use App\Http\Controllers\Notifications\BulkSendNotificationController;
 use App\Http\Controllers\Notifications\IndexSubscriberNotificationsController;
 use App\Http\Controllers\Notifications\ShowNotificationController;
 use App\Http\Controllers\Subscribers\DestroySubscriberController;
@@ -22,5 +23,6 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/subscribers/{id}/notifications', IndexSubscriberNotificationsController::class);
         Route::get('/notifications/{id}', ShowNotificationController::class);
+        Route::post('/notifications/bulk', BulkSendNotificationController::class);
     });
 });

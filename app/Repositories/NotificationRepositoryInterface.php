@@ -18,4 +18,13 @@ interface NotificationRepositoryInterface
     public function findByIdempotencyKey(string $key): ?Notification;
 
     public function findByProviderMessageId(string $id): ?Notification;
+
+    /**
+     * Создаёт N уведомлений одним SQL INSERT.
+     * ID должны быть предварительно заполнены в каждой строке.
+     *
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array<int, string>
+     */
+    public function createBulk(array $rows): array;
 }

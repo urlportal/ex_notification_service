@@ -25,4 +25,12 @@ interface SubscriberRepositoryInterface
     public function existsByPhone(?string $phone, ?string $excludeId = null): bool;
 
     public function existsByEmail(?string $email, ?string $excludeId = null): bool;
+
+    /**
+     * Возвращает подмножество переданных ID, которые существуют в БД.
+     *
+     * @param  array<int, string>  $ids
+     * @return array<int, string>
+     */
+    public function findExistingIds(array $ids): array;
 }

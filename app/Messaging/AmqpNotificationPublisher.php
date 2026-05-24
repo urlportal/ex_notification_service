@@ -48,7 +48,7 @@ class AmqpNotificationPublisher implements NotificationPublisherInterface
 
     private function channel(): AMQPChannel
     {
-        if ($this->channel === null) {
+        if ($this->channel === null || ! $this->channel->is_open()) {
             $this->channel = $this->factory->connection()->channel();
             // Включаем publisher confirms, чтобы wait_for_pending_acks() работал.
             $this->channel->confirm_select();

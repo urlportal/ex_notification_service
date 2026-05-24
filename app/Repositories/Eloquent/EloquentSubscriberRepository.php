@@ -84,4 +84,16 @@ class EloquentSubscriberRepository implements SubscriberRepositoryInterface
             ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
             ->exists();
     }
+
+    /**
+     * @param  array<int, string>  $ids
+     * @return array<int, string>
+     */
+    public function findExistingIds(array $ids): array
+    {
+        return Subscriber::query()
+            ->whereIn('id', $ids)
+            ->pluck('id')
+            ->all();
+    }
 }

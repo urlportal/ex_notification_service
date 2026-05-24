@@ -1,7 +1,9 @@
 <?php
 
 use App\Exceptions\AlreadyExistsException;
+use App\Exceptions\IdempotencyConflictException;
 use App\Exceptions\NotFoundException;
+use App\Exceptions\SubscribersNotFoundException;
 use App\Http\Middleware\ApiTokenAuth;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureNotProduction;
@@ -32,5 +34,17 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         $exceptions->render(function (AlreadyExistsException $e, Request $request) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_CONFLICT);
+        });
+        $exceptions->render(function (IdempotencyConflictException $e, Request $request) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_CONFLICT);
+        });
+        $exceptions->render(function (SubscribersNotFoundException $e, Request $request) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'missing_subscriber_ids' => $e->getMissingIds(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        });
+        $exceptions->render(function (RedisException $e, Request $request) {
+            return response()->json(['message' => 'Service temporarily unavailable'], Response::HTTP_SERVICE_UNAVAILABLE);
         });
     })->create();

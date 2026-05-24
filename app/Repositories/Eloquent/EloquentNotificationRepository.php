@@ -6,6 +6,7 @@ use App\Exceptions\NotFoundException;
 use App\Models\Notification;
 use App\Repositories\NotificationRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class EloquentNotificationRepository implements NotificationRepositoryInterface
 {
@@ -43,5 +44,16 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
     public function findByProviderMessageId(string $id): ?Notification
     {
         return Notification::where('provider_message_id', $id)->first();
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array<int, string>
+     */
+    public function createBulk(array $rows): array
+    {
+        DB::table('notifications')->insert($rows);
+
+        return array_column($rows, 'id');
     }
 }
