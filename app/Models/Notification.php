@@ -5,12 +5,15 @@ namespace App\Models;
 use App\Enums\NotificationChannel;
 use App\Enums\NotificationPriority;
 use App\Enums\NotificationStatus;
+use App\Models\Traits\HasUuidV7;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Ramsey\Uuid\Uuid;
 
 class Notification extends Model
 {
+    use HasUuidV7;
+
     protected $keyType = 'string';
 
     public $incrementing = false;
@@ -43,17 +46,6 @@ class Notification extends Model
         'delivered_at' => 'datetime',
         'dropped_at' => 'datetime',
     ];
-
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::creating(function (self $model): void {
-            if (empty($model->id)) {
-                $model->id = Uuid::uuid7()->toString();
-            }
-        });
-    }
 
     public function subscriber(): BelongsTo
     {

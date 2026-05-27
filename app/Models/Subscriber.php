@@ -2,25 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasUuidV7;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
 class Subscriber extends Model
 {
+    use HasUuidV7;
+
     protected $keyType = 'string';
 
     public $incrementing = false;
 
     protected $fillable = ['id', 'name', 'phone', 'email'];
-
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::creating(function (self $model): void {
-            if (empty($model->id)) {
-                $model->id = Uuid::uuid7()->toString();
-            }
-        });
-    }
 }
