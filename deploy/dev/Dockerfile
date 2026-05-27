@@ -49,8 +49,6 @@ RUN echo "xdebug.mode=debug" >> "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini" 
     && mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
     && git config --system --add safe.directory /app
 
-COPY deploy/dev/supervisor/supervisord.conf /etc/supervisord.conf
+COPY deploy/dev/supervisor/supervisord-workers.conf /etc/supervisord.conf
 
 WORKDIR /app
-
-CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]

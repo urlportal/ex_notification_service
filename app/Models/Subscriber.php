@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Models\Traits\HasUuidV7;
 use Illuminate\Database\Eloquent\Model;
-use Ramsey\Uuid\Uuid;
 
 class Subscriber extends Model
 {

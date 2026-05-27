@@ -12,8 +12,6 @@ trait HasUuidV7
 {
     protected static function bootHasUuidV7(): void
     {
-        parent::boot();
-
         static::creating(static function (self $model): void {
             if (empty($model->{$model->getKeyName()})) {
                 $model->{$model->getKeyName()} = Uuid::uuid7()->toString();

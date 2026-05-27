@@ -85,6 +85,7 @@ services:
         CONTAINER_EXEC_USER_ID: "${CONTAINER_EXEC_USER_ID:-1000}"
         CONTAINER_EXEC_GROUP_ID: "${CONTAINER_EXEC_GROUP_ID:-1000}"
     container_name: '${APP_NAME}-php'
+    command: php-fpm --nodaemonize
     environment:
       XDEBUG_TRIGGER: 1
       XDEBUG_MODE: 'develop,debug'
@@ -98,6 +99,34 @@ services:
       - ./deploy/dev/fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  workers:
+    build:
+      context: .
+      dockerfile: deploy/dev/Dockerfile
+      args:
+        CONTAINER_EXEC_USER_ID: "${CONTAINER_EXEC_USER_ID:-1000}"
+        CONTAINER_EXEC_GROUP_ID: "${CONTAINER_EXEC_GROUP_ID:-1000}"
+    container_name: '${APP_NAME}_workers'
+    command: supervisord -n -c /etc/supervisord.conf
+    environment:
+      OUTBOX_RELAY_NUMPROCS: '${OUTBOX_RELAY_NUMPROCS:-2}'
+      OUTBOX_RELAY_BATCH_SIZE: '${OUTBOX_RELAY_BATCH_SIZE:-100}'
+      OUTBOX_RELAY_IDLE_SLEEP_MS: '${OUTBOX_RELAY_IDLE_SLEEP_MS:-500}'
+    working_dir: /app
+    restart: "no"
+    volumes:
+      - ./:/app
+    env_file: .env
     depends_on:
       postgres:
         condition: service_healthy

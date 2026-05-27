@@ -8,7 +8,6 @@ use App\Enums\NotificationStatus;
 use App\Models\Traits\HasUuidV7;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Ramsey\Uuid\Uuid;
 
 class Notification extends Model
 {
