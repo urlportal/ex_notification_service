@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Logging\RequestIdContext;
 use App\Messaging\AmqpConnectionFactory;
 use App\Messaging\AmqpNotificationPublisher;
+use App\Messaging\Inbox\Eloquent\EloquentMsgInboxRepository;
+use App\Messaging\Inbox\MsgInboxRepositoryInterface;
 use App\Messaging\NotificationPublisherInterface;
 use App\Messaging\Outbox\Eloquent\EloquentMsgOutboxRepository;
 use App\Messaging\Outbox\MsgOutboxRepositoryInterface;
@@ -36,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
         // Outbox-инфраструктура
         $this->app->bind(MsgOutboxRepositoryInterface::class, EloquentMsgOutboxRepository::class);
         $this->app->singleton(OutboxMessagePublisher::class);
+
+        // Inbox-инфраструктура
+        $this->app->bind(MsgInboxRepositoryInterface::class, EloquentMsgInboxRepository::class);
 
         $this->app->terminating(function (): void {
             $this->app->make(AmqpConnectionFactory::class)->close();
