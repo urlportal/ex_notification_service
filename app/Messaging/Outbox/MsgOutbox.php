@@ -4,7 +4,19 @@ namespace App\Messaging\Outbox;
 
 use App\Models\Traits\HasUuidV7;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property string $id
+ * @property string $exchange
+ * @property string $routing_key
+ * @property array<string, mixed> $payload
+ * @property array<string, mixed> $headers
+ * @property OutboxStatus $status
+ * @property int $attempts
+ * @property string|null $last_error
+ * @property Carbon|null $published_at
+ */
 class MsgOutbox extends Model
 {
     use HasUuidV7;

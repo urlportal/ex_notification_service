@@ -5,7 +5,7 @@
       "description": "Health",
       "item": [
         {
-          "id": "9a8003c6-4197-403d-888c-180e1609b975",
+          "id": "e64d33b9-674b-4868-b55e-b626e3859abb",
           "name": "Проверка работоспособности сервиса",
           "request": {
             "name": "Проверка работоспособности сервиса",
@@ -38,7 +38,7 @@
           },
           "response": [
             {
-              "id": "c8249098-bfa3-4f1b-80f8-10d616138806",
+              "id": "8a579ebb-b637-401e-8fd2-90d2f9dbfdd3",
               "name": "Сервис работает",
               "originalRequest": {
                 "url": {
@@ -87,7 +87,394 @@
       "description": "Notifications",
       "item": [
         {
-          "id": "ddb96349-d6fb-48b9-8a2c-8f058eaaace2",
+          "id": "4db77fe8-d64e-4994-84d2-63ed018ab0fa",
+          "name": "Массовая рассылка уведомлений",
+          "request": {
+            "name": "Массовая рассылка уведомлений",
+            "description": {
+              "content": "Принимает массовую рассылку асинхронно: пишет одно сообщение в transactional outbox и сразу отвечает 202. Tolerant ingest — невалидные subscriber_ids не приводят к 422, а возвращаются в invalid_subscriber_ids. Доставка асинхронна; статус смотрите через GET /api/v1/subscribers/{id}/notifications?bulk_request_id=...",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "bulk"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [],
+              "raw": "{{base_url}}/api/v1/notifications/bulk"
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": {
+                  "content": "(Required) UUID ключа идемпотентности (обязателен)",
+                  "type": "text/plain"
+                },
+                "key": "Idempotency-Key",
+                "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+              },
+              {
+                "disabled": false,
+                "description": {
+                  "content": "UUID для сквозной трассировки (опционален; иначе генерируется)",
+                  "type": "text/plain"
+                },
+                "key": "X-Request-ID",
+                "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"email\",\n  \"priority\": \"transactional\",\n  \"message\": \"Ваш заказ подтверждён\",\n  \"subscriber_ids\": [\n    \"019600a2-7c3b-7000-9f3b-000000000001\",\n    \"019600a2-7c3b-7000-9f3b-000000000002\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{api_token}}"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "65b0ec8d-adc2-4fdd-8777-4cca05b50630",
+              "name": "Запрос принят к асинхронной обработке",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "bulk"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "(Required) UUID ключа идемпотентности (обязателен)",
+                      "type": "text/plain"
+                    },
+                    "key": "Idempotency-Key",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки (опционален; иначе генерируется)",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": \"email\",\n  \"priority\": \"transactional\",\n  \"message\": \"Ваш заказ подтверждён\",\n  \"subscriber_ids\": [\n    \"019600a2-7c3b-7000-9f3b-000000000001\",\n    \"019600a2-7c3b-7000-9f3b-000000000002\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Accepted",
+              "code": 202,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"bulk_request_id\": \"019600a2-7c3b-7000-9f3b-aaaaaaaaaaaa\",\n  \"accepted\": 5,\n  \"invalid_subscriber_ids\": [\n    \"8c5f25a9-0691-b4a6-414f-6f1168e81d59\",\n    \"82a0eabe-7b61-1f26-86fb-257abfc642fa\"\n  ]\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "3dcee2eb-1be1-41d1-b0c9-5d4ac1b87e3d",
+              "name": "Не авторизован",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "bulk"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "(Required) UUID ключа идемпотентности (обязателен)",
+                      "type": "text/plain"
+                    },
+                    "key": "Idempotency-Key",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки (опционален; иначе генерируется)",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": \"email\",\n  \"priority\": \"transactional\",\n  \"message\": \"Ваш заказ подтверждён\",\n  \"subscriber_ids\": [\n    \"019600a2-7c3b-7000-9f3b-000000000001\",\n    \"019600a2-7c3b-7000-9f3b-000000000002\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Unauthenticated\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "a8ba22b9-6765-4a7e-bdd4-8e658e8c0717",
+              "name": "Запрос с тем же Idempotency-Key ещё обрабатывается",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "bulk"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "(Required) UUID ключа идемпотентности (обязателен)",
+                      "type": "text/plain"
+                    },
+                    "key": "Idempotency-Key",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки (опционален; иначе генерируется)",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": \"email\",\n  \"priority\": \"transactional\",\n  \"message\": \"Ваш заказ подтверждён\",\n  \"subscriber_ids\": [\n    \"019600a2-7c3b-7000-9f3b-000000000001\",\n    \"019600a2-7c3b-7000-9f3b-000000000002\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Request is being processed\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "279e52ed-4b98-4541-8f4f-1453b8fbbd72",
+              "name": "Ошибка валидации (в т.ч. отсутствует Idempotency-Key или превышен лимит subscriber_ids)",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "api",
+                    "v1",
+                    "notifications",
+                    "bulk"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": []
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "(Required) UUID ключа идемпотентности (обязателен)",
+                      "type": "text/plain"
+                    },
+                    "key": "Idempotency-Key",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки (опционален; иначе генерируется)",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": {
+                      "content": "Added as a part of security scheme: bearer",
+                      "type": "text/plain"
+                    },
+                    "key": "Authorization",
+                    "value": "Bearer <token>"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": \"email\",\n  \"priority\": \"transactional\",\n  \"message\": \"Ваш заказ подтверждён\",\n  \"subscriber_ids\": [\n    \"019600a2-7c3b-7000-9f3b-000000000001\",\n    \"019600a2-7c3b-7000-9f3b-000000000002\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"The given data was invalid.\",\n  \"errors\": {\n    \"key_0\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        },
+        {
+          "id": "1c3e4fe5-7eb3-4658-a8f5-4ab7f024910e",
           "name": "Получить уведомления подписчика",
           "request": {
             "name": "Получить уведомления подписчика",
@@ -187,7 +574,7 @@
           },
           "response": [
             {
-              "id": "44b8fb74-8c15-4982-8c08-9af86400bad7",
+              "id": "f2cf4a5c-c1d4-442f-bf2f-72bcc27f00d8",
               "name": "Список уведомлений",
               "originalRequest": {
                 "url": {
@@ -291,7 +678,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "bd0b5390-bd05-441e-867a-aedb99eeacd1",
+              "id": "87ee0e10-2a9c-4aae-b7fa-ac3bd57b06bc",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -395,7 +782,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "b4ec7c04-80b2-4d82-94a8-f00d35cbffe3",
+              "id": "cc53f852-2862-4dc1-aaf7-efa063e4230d",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -499,7 +886,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "c686b1c6-7c3e-4786-a321-d3dd791d3d13",
+              "id": "c9ee87b3-148c-4efd-961f-65ced926cce4",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -609,7 +996,7 @@
           }
         },
         {
-          "id": "688b394c-65cb-416c-b1b4-2492c0e58ec2",
+          "id": "670f9353-a95e-4c18-b102-16a66692abf8",
           "name": "Получить уведомление по UUID",
           "request": {
             "name": "Получить уведомление по UUID",
@@ -662,7 +1049,7 @@
           },
           "response": [
             {
-              "id": "07c0c3bd-f79f-4414-b62b-e4d60f8d9660",
+              "id": "6fd89f89-724f-4693-8618-37a95624d7bb",
               "name": "Данные уведомления",
               "originalRequest": {
                 "url": {
@@ -719,7 +1106,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "a38a44cb-3fe1-4cbd-afe4-0567bbddec25",
+              "id": "81530c70-23b9-4dc5-bfed-efc9e62b3a69",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -776,7 +1163,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "9376250b-99f9-46a9-9a70-1516653a7ec9",
+              "id": "b13b7b98-88a9-4e32-9ae7-655878659773",
               "name": "Уведомление не найдено",
               "originalRequest": {
                 "url": {
@@ -845,7 +1232,7 @@
       "description": "Subscribers",
       "item": [
         {
-          "id": "72fadbff-488e-415b-b280-f3c9f957da35",
+          "id": "34091ef1-3cf8-4ed7-b884-27c4388e21f6",
           "name": "Получить подписчика по UUID",
           "request": {
             "name": "Получить подписчика по UUID",
@@ -898,7 +1285,7 @@
           },
           "response": [
             {
-              "id": "2bf957da-fedb-426f-bd42-df95d3de7464",
+              "id": "86c38863-3016-49b3-b248-841db1fa5d32",
               "name": "Данные подписчика",
               "originalRequest": {
                 "url": {
@@ -955,7 +1342,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "3e4d1305-8b77-4a2d-967f-52635e315e8d",
+              "id": "3dd90789-e006-4068-b5fc-35dc0188522d",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1012,7 +1399,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "862c3723-fb15-4a20-8680-9bdd18a9b13f",
+              "id": "e2f7b582-1bd1-422c-9ddb-267b96557ed5",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -1075,7 +1462,7 @@
           }
         },
         {
-          "id": "3e3900b7-2199-4849-b473-da0d2164a674",
+          "id": "cdaee00e-1889-4a82-9038-f6df8b2db046",
           "name": "Удалить подписчика",
           "request": {
             "name": "Удалить подписчика",
@@ -1128,7 +1515,7 @@
           },
           "response": [
             {
-              "id": "e3b3d25d-7a0a-4632-8e6f-ecc7d7d3573b",
+              "id": "a8c13968-5188-4017-ae52-660676f8c48e",
               "name": "Подписчик удалён",
               "originalRequest": {
                 "url": {
@@ -1175,7 +1562,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "042eb6ff-5157-4d90-9a71-458a3d57b0d2",
+              "id": "95649a23-db8a-418e-a1cb-8d3cfd7e7e1b",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1232,7 +1619,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "e8294c79-a3a7-44e4-a48d-f3b486ba86f3",
+              "id": "646e3c1a-c446-43a1-92f4-fe30f8760854",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -1295,7 +1682,7 @@
           }
         },
         {
-          "id": "1fe0f071-25c8-4e72-9640-988eca23d6d2",
+          "id": "91914d16-c810-4c6d-92aa-54c487dbb375",
           "name": "Частичное обновление подписчика",
           "request": {
             "name": "Частичное обновление подписчика",
@@ -1361,7 +1748,7 @@
           },
           "response": [
             {
-              "id": "00c8794b-8e54-4c3d-b5ee-131fb92318e6",
+              "id": "c3e2e578-926f-43eb-a3ac-85b5fa897bab",
               "name": "Подписчик обновлён",
               "originalRequest": {
                 "url": {
@@ -1431,7 +1818,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "7f260962-39e7-4d29-a0b6-73c048ec3bb0",
+              "id": "a4d28d8e-3849-4035-b006-5bd1b59e73a0",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1501,7 +1888,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "18b07f76-0e3d-4c3a-b467-133d78773738",
+              "id": "a859a9df-499d-48e1-a7bb-8b4be19bcfbc",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -1571,7 +1958,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "3815380d-8844-4922-8313-62463ab86e5d",
+              "id": "868b897b-eb9d-4bfa-888f-98991b4a0244",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -1647,7 +2034,7 @@
           }
         },
         {
-          "id": "2765dd51-4b85-4486-9c49-6aad6e75aed1",
+          "id": "1a82da7c-7fef-476e-b6c3-cc5f332c08bb",
           "name": "Получить список подписчиков",
           "request": {
             "name": "Получить список подписчиков",
@@ -1716,7 +2103,7 @@
           },
           "response": [
             {
-              "id": "9946f358-0ba1-4543-a822-0464a398f4fd",
+              "id": "b982d9ca-4713-4dd0-8c7d-13a9363d5aa2",
               "name": "Список подписчиков",
               "originalRequest": {
                 "url": {
@@ -1789,7 +2176,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "ec0c3d50-8337-478e-827f-7702601948df",
+              "id": "5788d4bb-4cd7-4590-ba06-5719b76cdcad",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1868,7 +2255,7 @@
           }
         },
         {
-          "id": "24b187ea-ab50-4ec9-9eff-bb59bddc040c",
+          "id": "9614c627-3c68-41d2-8c36-52e32237112d",
           "name": "Создать подписчика",
           "request": {
             "name": "Создать подписчика",
@@ -1922,7 +2309,7 @@
           },
           "response": [
             {
-              "id": "63c606f2-4f91-434d-8393-e28c68ac06aa",
+              "id": "19ebf572-9c30-44a5-9d77-e3b5dd14e171",
               "name": "Подписчик создан",
               "originalRequest": {
                 "url": {
@@ -1980,7 +2367,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "1fd4f1b3-4625-45fb-8141-18b3410d814f",
+              "id": "4389835c-74bb-4bce-b0b5-a2741ae89767",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -2038,7 +2425,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "43788cbe-6612-4c7c-88ba-12f5a146b2d0",
+              "id": "c075e281-1d39-4c4d-a717-8a6f343d690e",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -2120,7 +2507,7 @@
     }
   ],
   "info": {
-    "_postman_id": "7011b37d-1d46-4c1a-9704-6166d08dccd2",
+    "_postman_id": "d90d785a-d7c9-4d72-9d3a-864329f4ee5e",
     "name": "Notification Service API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {

@@ -2,14 +2,12 @@
 
 namespace App\Services;
 
-use App\Enums\NotificationStatus;
 use App\Exceptions\IdempotencyConflictException;
-use App\Exceptions\SubscribersNotFoundException;
+use App\Http\DTO\Notifications\BulkAcceptedResponse;
 use App\Http\DTO\Notifications\BulkSendNotificationDto;
 use App\Logging\RequestIdContext;
-use App\Messaging\NotificationPublisherInterface;
-use App\Models\Notification;
-use App\Repositories\NotificationRepositoryInterface;
+use App\Messaging\Outbox\MsgOutboxEntry;
+use App\Messaging\Outbox\MsgOutboxRepositoryInterface;
 use App\Repositories\SubscriberRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Psr\Log\LoggerInterface;
@@ -21,89 +19,103 @@ class BulkNotificationService
         private readonly RequestIdContext $requestIdContext,
         private readonly IdempotencyService $idempotencyService,
         private readonly SubscriberRepositoryInterface $subscriberRepository,
-        private readonly NotificationRepositoryInterface $notificationRepository,
-        private readonly NotificationPublisherInterface $notificationPublisher,
+        private readonly MsgOutboxRepositoryInterface $outboxRepository,
         private readonly LoggerInterface $logger,
     ) {}
 
-    /**
-     * @return array{bulk_request_id: string, accepted: int, notification_ids: array<int, string>}
-     */
-    public function handle(BulkSendNotificationDto $dto): array
+    public function handle(BulkSendNotificationDto $dto): BulkAcceptedResponse
     {
         $requestId = $this->requestIdContext->get() ?? Uuid::uuid7()->toString();
         $ttlSeconds = $this->idempotencyService->getDefaultTtl();
 
-        /** @var array{bulk_request_id: string, accepted: int, notification_ids: array<int, string>}|null $cached */
         $cached = $this->idempotencyService->getResponse($dto->idempotencyKey);
         if ($cached !== null) {
-            return $cached;
+            return $this->fromCache($cached);
         }
 
         $acquired = $this->idempotencyService->acquire($dto->idempotencyKey, $ttlSeconds);
         if (! $acquired) {
-            /** @var array{bulk_request_id: string, accepted: int, notification_ids: array<int, string>}|null $retried */
             $retried = $this->idempotencyService->getResponse($dto->idempotencyKey);
             if ($retried !== null) {
-                return $retried;
+                return $this->fromCache($retried);
             }
             throw new IdempotencyConflictException;
         }
 
-        $existingIds = $this->subscriberRepository->findExistingIds($dto->subscriberIds);
-        $missingIds = array_values(array_diff($dto->subscriberIds, $existingIds));
-        if (! empty($missingIds)) {
-            throw new SubscribersNotFoundException($missingIds);
-        }
-
-        $bulkRequestId = Uuid::uuid7()->toString();
-        $now = now()->toDateTimeString();
-        $rows = [];
-        $notificationIds = [];
-
+        // Tolerant ingest: один SELECT по индексу, затем фильтрация исходного
+        // списка с сохранением порядка запроса (findExistingIds порядок не гарантирует).
+        $existingSet = array_flip($this->subscriberRepository->findExistingIds($dto->subscriberIds));
+        $acceptedIds = [];
+        $invalidIds = [];
         foreach ($dto->subscriberIds as $subscriberId) {
-            $id = Uuid::uuid7()->toString();
-            $notificationIds[] = $id;
-            $rows[] = [
-                'id' => $id,
-                'subscriber_id' => $subscriberId,
-                'bulk_request_id' => $bulkRequestId,
-                'channel' => $dto->channel->value,
-                'priority' => $dto->priority->value,
-                'status' => NotificationStatus::Queued->value,
-                'message' => $dto->message,
-                'idempotency_key' => $dto->idempotencyKey,
-                'request_id' => $requestId,
-                'queued_at' => $now,
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
-        }
-
-        DB::transaction(function () use ($rows): void {
-            $this->notificationRepository->createBulk($rows);
-        });
-
-        foreach ($rows as $row) {
-            $notification = new Notification(['id' => $row['id'], 'priority' => $dto->priority->value]);
-            try {
-                $this->notificationPublisher->publishForInitialSend($notification, $requestId);
-            } catch (\Throwable $e) {
-                $this->logger->error('Ошибка публикации уведомления в RabbitMQ', [
-                    'notification_id' => $row['id'],
-                    'error' => $e->getMessage(),
-                ]);
+            if (isset($existingSet[$subscriberId])) {
+                $acceptedIds[] = $subscriberId;
+            } else {
+                $invalidIds[] = $subscriberId;
             }
         }
 
-        $response = [
-            'bulk_request_id' => $bulkRequestId,
-            'accepted' => count($notificationIds),
-            'notification_ids' => $notificationIds,
-        ];
+        $bulkRequestId = Uuid::uuid7()->toString();
+        $outboxId = null;
 
-        $this->idempotencyService->storeResponse($dto->idempotencyKey, $response, $ttlSeconds);
+        if ($acceptedIds !== []) {
+            $outboxId = Uuid::uuid7()->toString();
+            $payload = [
+                'bulk_request_id' => $bulkRequestId,
+                'channel' => $dto->channel->value,
+                'priority' => $dto->priority->value,
+                'message' => $dto->message,
+                'subscriber_ids' => $acceptedIds,
+                'idempotency_key' => $dto->idempotencyKey,
+            ];
+            $headers = ['request_id' => $requestId, 'retry_attempt' => 0];
+
+            DB::transaction(function () use ($outboxId, $payload, $headers): void {
+                $this->outboxRepository->enqueue(new MsgOutboxEntry(
+                    id: $outboxId,
+                    exchange: config('rabbitmq.fanout.exchange'),
+                    routingKey: config('rabbitmq.fanout.routing_key'),
+                    payload: $payload,
+                    headers: $headers,
+                ));
+            });
+        }
+
+        $response = new BulkAcceptedResponse(
+            bulkRequestId: $bulkRequestId,
+            accepted: count($acceptedIds),
+            invalidSubscriberIds: $invalidIds,
+        );
+
+        // Точка трассировки в начале асинхронной цепочки HTTP → outbox → relay → брокер.
+        $this->logger->info('bulk notification accepted', [
+            'request_id' => $requestId,
+            'bulk_request_id' => $bulkRequestId,
+            'outbox_id' => $outboxId,
+            'accepted' => $response->accepted,
+            'invalid_count' => count($invalidIds),
+        ]);
+
+        $this->idempotencyService->storeResponse($dto->idempotencyKey, $response->toArray(), $ttlSeconds);
 
         return $response;
+    }
+
+    /**
+     * Восстанавливает DTO ответа из закэшированного snake_case-массива,
+     * чтобы повторный запрос отдал идентичный JSON.
+     *
+     * @param  array<string, mixed>  $cached
+     */
+    private function fromCache(array $cached): BulkAcceptedResponse
+    {
+        /** @var list<string> $invalid */
+        $invalid = is_array($cached['invalid_subscriber_ids'] ?? null) ? array_values($cached['invalid_subscriber_ids']) : [];
+
+        return new BulkAcceptedResponse(
+            bulkRequestId: (string) $cached['bulk_request_id'],
+            accepted: (int) $cached['accepted'],
+            invalidSubscriberIds: $invalid,
+        );
     }
 }

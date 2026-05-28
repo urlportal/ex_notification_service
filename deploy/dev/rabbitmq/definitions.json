@@ -42,6 +42,14 @@
       "durable": true,
       "auto_delete": false,
       "arguments": {}
+    },
+    {
+      "name": "notifications.fanout.exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
     }
   ],
   "queues": [
@@ -99,6 +107,18 @@
       "arguments": {
         "x-queue-type": "quorum"
       }
+    },
+    {
+      "name": "notifications.fanout",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "quorum",
+        "x-dead-letter-exchange": "notifications.dlx",
+        "x-delivery-limit": 5,
+        "x-quorum-initial-group-size": 1
+      }
     }
   ],
   "bindings": [
@@ -140,6 +160,14 @@
       "destination": "notifications.dlq",
       "destination_type": "queue",
       "routing_key": "#",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.fanout.exchange",
+      "vhost": "/",
+      "destination": "notifications.fanout",
+      "destination_type": "queue",
+      "routing_key": "fanout",
       "arguments": {}
     }
   ]

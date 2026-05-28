@@ -47,6 +47,110 @@
                 }
             }
         },
+        "/api/v1/notifications/bulk": {
+            "post": {
+                "tags": [
+                    "Notifications"
+                ],
+                "summary": "Массовая рассылка уведомлений",
+                "description": "Принимает массовую рассылку асинхронно: пишет одно сообщение в transactional outbox и сразу отвечает 202. Tolerant ingest — невалидные subscriber_ids не приводят к 422, а возвращаются в invalid_subscriber_ids. Доставка асинхронна; статус смотрите через GET /api/v1/subscribers/{id}/notifications?bulk_request_id=...",
+                "operationId": "81a2e80170b493ce8cf0d4c14348eebb",
+                "parameters": [
+                    {
+                        "name": "Idempotency-Key",
+                        "in": "header",
+                        "description": "UUID ключа идемпотентности (обязателен)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "description": "UUID для сквозной трассировки (опционален; иначе генерируется)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BulkSendNotificationRequest"
+                            },
+                            "example": {
+                                "channel": "email",
+                                "priority": "transactional",
+                                "message": "Ваш заказ подтверждён",
+                                "subscriber_ids": [
+                                    "019600a2-7c3b-7000-9f3b-000000000001",
+                                    "019600a2-7c3b-7000-9f3b-000000000002"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Запрос принят к асинхронной обработке",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BulkAcceptedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Не авторизован",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Запрос с тем же Idempotency-Key ещё обрабатывается",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Request is being processed"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации (в т.ч. отсутствует Idempotency-Key или превышен лимит subscriber_ids)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/subscribers/{id}/notifications": {
             "get": {
                 "tags": [
@@ -1021,6 +1125,77 @@
                     },
                     "meta": {
                         "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "type": "object"
+            },
+            "BulkSendNotificationRequest": {
+                "required": [
+                    "channel",
+                    "priority",
+                    "message",
+                    "subscriber_ids"
+                ],
+                "properties": {
+                    "channel": {
+                        "type": "string",
+                        "example": "email",
+                        "enum": [
+                            "sms",
+                            "email"
+                        ]
+                    },
+                    "priority": {
+                        "type": "string",
+                        "example": "transactional",
+                        "enum": [
+                            "transactional",
+                            "marketing"
+                        ]
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Ваш заказ подтверждён",
+                        "maxLength": 1000,
+                        "minLength": 1
+                    },
+                    "subscriber_ids": {
+                        "description": "Список UUID подписчиков (уникальные). Несуществующие не приводят к 422, а возвращаются в invalid_subscriber_ids.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "maxItems": 500,
+                        "minItems": 1
+                    }
+                },
+                "type": "object"
+            },
+            "BulkAcceptedResponse": {
+                "required": [
+                    "bulk_request_id",
+                    "accepted",
+                    "invalid_subscriber_ids"
+                ],
+                "properties": {
+                    "bulk_request_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "example": "019600a2-7c3b-7000-9f3b-aaaaaaaaaaaa"
+                    },
+                    "accepted": {
+                        "description": "Число принятых к рассылке (существующих) подписчиков",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "invalid_subscriber_ids": {
+                        "description": "Несуществующие subscriber_ids в порядке запроса",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
                     }
                 },
                 "type": "object"

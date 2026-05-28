@@ -28,7 +28,7 @@ class BulkSendNotificationRequest extends FormRequest
             'channel' => ['required', 'string', Rule::in(array_column(NotificationChannel::cases(), 'value'))],
             'priority' => ['required', 'string', Rule::in(array_column(NotificationPriority::cases(), 'value'))],
             'message' => ['required', 'string', 'min:1', 'max:1000'],
-            'subscriber_ids' => ['required', 'array', 'min:1', 'max:1000'],
+            'subscriber_ids' => ['required', 'array', 'min:1', 'max:'.config('notifications.bulk.max_subscribers')],
             'subscriber_ids.*' => ['required', 'uuid', 'distinct'],
         ];
     }

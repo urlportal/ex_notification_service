@@ -4,33 +4,34 @@ namespace Tests\Feature\Notifications;
 
 use App\Enums\NotificationChannel;
 use App\Enums\NotificationPriority;
-use App\Enums\NotificationStatus;
 use App\Messaging\AmqpConnectionFactory;
-use App\Messaging\NotificationPublisherInterface;
-use App\Models\Notification;
+use App\Messaging\Outbox\MsgOutbox;
+use App\Messaging\Outbox\OutboxStatus;
 use App\Models\Subscriber;
 use App\Services\IdempotencyService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Testing\TestResponse;
 use Monolog\Handler\TestHandler;
-use Monolog\Level;
 use PhpAmqpLib\Message\AMQPMessage;
 use Ramsey\Uuid\Uuid;
 use Tests\TestCase;
 
+/**
+ * Намеренно не используем RefreshDatabase: тест прогоняет настоящий
+ * OutboxRelay (messaging:outbox-relay), а его SELECT...FOR UPDATE SKIP LOCKED
+ * должен видеть committed-строки. Поэтому изоляция (ручной TRUNCATE в
+ * setUp/tearDown (как в OutboxRelayTest)), а не транзакция-обёртка.
+ */
 class BulkSendNotificationTest extends TestCase
 {
-    use RefreshDatabase;
-
     private const TOKEN = 'phpunit-test-token';
 
-    private const QUEUES_TO_DRAIN = [
-        'notifications.transactional',
-        'notifications.marketing',
-    ];
+    private const FANOUT_QUEUE = 'notifications.fanout';
 
-    /** Отдельное соединение для чтения из очередей в тестах — не разделяется с паблишером */
     private AmqpConnectionFactory $readFactory;
 
     protected function setUp(): void
@@ -38,22 +39,28 @@ class BulkSendNotificationTest extends TestCase
         parent::setUp();
         config(['auth.api_token' => self::TOKEN]);
         $this->readFactory = new AmqpConnectionFactory;
-        $this->drainQueues();
+        $this->truncateTables();
+        $this->drainFanout();
         Redis::flushdb();
     }
 
     protected function tearDown(): void
     {
+        $this->drainFanout();
         $this->readFactory->close();
+        $this->truncateTables();
         parent::tearDown();
     }
 
-    private function drainQueues(): void
+    private function truncateTables(): void
+    {
+        DB::statement('TRUNCATE TABLE notifications, msg_outbox, subscribers RESTART IDENTITY CASCADE');
+    }
+
+    private function drainFanout(): void
     {
         $channel = $this->readFactory->connection()->channel();
-        foreach (self::QUEUES_TO_DRAIN as $queue) {
-            while ($channel->basic_get($queue, no_ack: true) !== null) {
-            }
+        while ($channel->basic_get(self::FANOUT_QUEUE, no_ack: true) !== null) {
         }
         $channel->close();
     }
@@ -75,15 +82,36 @@ class BulkSendNotificationTest extends TestCase
         return $ids;
     }
 
+    /** @return array<int, string> */
+    private function nonExistentIds(int $count): array
+    {
+        $ids = [];
+        for ($i = 0; $i < $count; $i++) {
+            $ids[] = Uuid::uuid7()->toString();
+        }
+
+        return $ids;
+    }
+
+    /** Запускает одну итерацию OutboxRelay */
+    private function runRelay(): void
+    {
+        $exitCode = Artisan::call('messaging:outbox-relay', [
+            '--batch-size' => 100,
+            '--max-iterations' => 1,
+        ]);
+        $this->assertSame(0, $exitCode);
+    }
+
     /** @return array<int, AMQPMessage> */
-    private function readMessages(string $queue, int $expected): array
+    private function readFanout(int $max): array
     {
         $channel = $this->readFactory->connection()->channel();
         $messages = [];
-        for ($i = 0; $i < $expected; $i++) {
-            $msg = $channel->basic_get($queue, no_ack: true);
-            if ($msg !== null) {
-                $messages[] = $msg;
+        for ($i = 0; $i < $max; $i++) {
+            $message = $channel->basic_get(self::FANOUT_QUEUE, no_ack: true);
+            if ($message !== null) {
+                $messages[] = $message;
             }
         }
         $channel->close();
@@ -91,142 +119,170 @@ class BulkSendNotificationTest extends TestCase
         return $messages;
     }
 
-    public function test_bulk_send_returns_202_with_correct_structure(): void
+    /**
+     * @param  array<string, mixed>  $body
+     * @param  array<string, string>  $headers
+     * @return TestResponse<JsonResponse>
+     */
+    private function postBulk(array $body, array $headers = []): TestResponse
     {
-        $subscriberIds = $this->makeSubscriberIds(3);
-        $idempotencyKey = Uuid::uuid4()->toString();
-
-        $response = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => $idempotencyKey,
-        ]))->postJson('/api/v1/notifications/bulk', [
+        $defaults = [
             'channel' => NotificationChannel::Email->value,
             'priority' => NotificationPriority::Transactional->value,
             'message' => 'Hello, subscriber!',
-            'subscriber_ids' => $subscriberIds,
-        ]);
+        ];
+
+        return $this->withHeaders(array_merge($this->auth(), [
+            'Idempotency-Key' => Uuid::uuid4()->toString(),
+        ], $headers))->postJson('/api/v1/notifications/bulk', array_merge($defaults, $body));
+    }
+
+    // Асинхронный приём через outbox
+
+    public function test_bulk_send_accepts_and_enqueues_single_outbox_row(): void
+    {
+        $subscriberIds = $this->makeSubscriberIds(3);
+
+        $response = $this->postBulk(['subscriber_ids' => $subscriberIds]);
 
         $response->assertStatus(202)
-            ->assertJsonStructure(['bulk_request_id', 'accepted', 'notification_ids'])
+            ->assertJsonStructure(['bulk_request_id', 'accepted', 'invalid_subscriber_ids'])
             ->assertJsonPath('accepted', 3)
-            ->assertJsonCount(3, 'notification_ids');
+            ->assertJsonPath('invalid_subscriber_ids', []);
 
-        // Проверяем наличие записей в БД
-        $this->assertDatabaseCount('notifications', 3);
-        foreach ($response->json('notification_ids') as $notificationId) {
-            $this->assertDatabaseHas('notifications', [
-                'id' => $notificationId,
-                'status' => NotificationStatus::Queued->value,
-                'idempotency_key' => $idempotencyKey,
-                'bulk_request_id' => $response->json('bulk_request_id'),
-            ]);
-        }
+        // notifications не создаются в этой фиче
+        $this->assertDatabaseCount('notifications', 0);
+        $this->assertDatabaseCount('msg_outbox', 1);
 
-        // Проверяем сообщения в RabbitMQ
-        $messages = $this->readMessages('notifications.transactional', 3);
-        $this->assertCount(3, $messages);
+        /** @var MsgOutbox $row */
+        $row = MsgOutbox::query()->firstOrFail();
+        $this->assertSame(OutboxStatus::Pending, $row->status);
+        $this->assertSame('notifications.fanout.exchange', $row->exchange);
+        $this->assertSame('fanout', $row->routing_key);
+        $this->assertNull($row->published_at);
 
-        foreach ($messages as $message) {
-            $body = json_decode($message->body, true);
-            $this->assertArrayHasKey('notification_id', $body);
-            $this->assertContains($body['notification_id'], $response->json('notification_ids'));
+        $this->assertSame($response->json('bulk_request_id'), $row->payload['bulk_request_id']);
+        $this->assertSame(NotificationChannel::Email->value, $row->payload['channel']);
+        $this->assertSame(NotificationPriority::Transactional->value, $row->payload['priority']);
+        $this->assertSame('Hello, subscriber!', $row->payload['message']);
+        $this->assertSame($subscriberIds, $row->payload['subscriber_ids']);
+        $this->assertArrayHasKey('idempotency_key', $row->payload);
+        $this->assertArrayHasKey('request_id', $row->headers);
+        $this->assertSame(0, $row->headers['retry_attempt']);
 
-            $headers = $message->get('application_headers')->getNativeData();
-            $this->assertSame(0, $headers['retry_attempt']);
-        }
+        // До relay очередь пуста
+        $this->assertCount(0, $this->readFanout(3));
+
+        // Публикуем через relay
+        $this->runRelay();
+
+        $messages = $this->readFanout(3);
+        $this->assertCount(1, $messages);
+
+        $message = $messages[0];
+        $this->assertSame($row->id, $message->get('message_id'));
+
+        $headers = $message->get('application_headers')->getNativeData();
+        $this->assertArrayHasKey('request_id', $headers);
+
+        $payload = json_decode($message->body, true);
+        $this->assertSame($subscriberIds, $payload['subscriber_ids']);
+        $this->assertSame($response->json('bulk_request_id'), $payload['bulk_request_id']);
+
+        // Строка теперь published
+        $row->refresh();
+        $this->assertSame(OutboxStatus::Published, $row->status);
+        $this->assertNotNull($row->published_at);
     }
 
-    public function test_routing_key_matches_priority(): void
+    public function test_accept_emits_single_info_log(): void
     {
-        $transactionalIds = $this->makeSubscriberIds(2, 'trn');
-        $marketingIds = $this->makeSubscriberIds(2, 'mkt');
+        $logHandler = new TestHandler;
+        Log::getLogger()->pushHandler($logHandler);
 
-        // Оба запроса отправляем до чтения очередей, чтобы не переиспользовать каналы между запросами
-        $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => Uuid::uuid4()->toString(),
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Transactional message',
-            'subscriber_ids' => $transactionalIds,
-        ])->assertStatus(202);
-
-        $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => Uuid::uuid4()->toString(),
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Sms->value,
-            'priority' => NotificationPriority::Marketing->value,
-            'message' => 'Marketing message',
-            'subscriber_ids' => $marketingIds,
-        ])->assertStatus(202);
-
-        // Каждый приоритет должен попасть только в соответствующую очередь
-        $transactionalMessages = $this->readMessages('notifications.transactional', 4);
-        $marketingMessages = $this->readMessages('notifications.marketing', 4);
-
-        $this->assertCount(2, $transactionalMessages);
-        $this->assertCount(2, $marketingMessages);
-    }
-
-    public function test_idempotent_repeat_request_returns_cached_response(): void
-    {
         $subscriberIds = $this->makeSubscriberIds(2);
-        $idempotencyKey = Uuid::uuid4()->toString();
 
-        $firstResponse = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => $idempotencyKey,
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Hello!',
-            'subscriber_ids' => $subscriberIds,
-        ]);
+        $this->postBulk(['subscriber_ids' => $subscriberIds])->assertStatus(202);
 
-        $firstResponse->assertStatus(202);
-        $bulkRequestId = $firstResponse->json('bulk_request_id');
+        $accepted = array_values(array_filter(
+            $logHandler->getRecords(),
+            static fn ($record): bool => $record->message === 'bulk notification accepted',
+        ));
 
-        // Сбрасываем очередь чтобы не считать уже опубликованные сообщения
-        $this->drainQueues();
-
-        $secondResponse = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => $idempotencyKey,
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Hello!',
-            'subscriber_ids' => $subscriberIds,
-        ]);
-
-        $secondResponse->assertStatus(202)
-            ->assertJsonPath('bulk_request_id', $bulkRequestId);
-
-        // Количество записей не изменилось
-        $this->assertDatabaseCount('notifications', 2);
-
-        // В очереди нет новых сообщений
-        $messages = $this->readMessages('notifications.transactional', 5);
-        $this->assertCount(0, $messages);
+        $this->assertCount(1, $accepted);
+        $context = $accepted[0]->context;
+        $this->assertArrayHasKey('request_id', $context);
+        $this->assertArrayHasKey('bulk_request_id', $context);
+        $this->assertNotNull($context['outbox_id']);
+        $this->assertSame(2, $context['accepted']);
+        $this->assertSame(0, $context['invalid_count']);
     }
 
-    public function test_concurrent_request_with_same_key_returns_409(): void
+    // Tolerant ingest
+
+    public function test_tolerant_ingest_accepts_existing_and_returns_invalid(): void
     {
-        $subscriberIds = $this->makeSubscriberIds(1);
-        $idempotencyKey = Uuid::uuid4()->toString();
+        $existing = $this->makeSubscriberIds(5);
+        $invalid = $this->nonExistentIds(2);
 
-        // Имитируем параллельный запрос: вручную захватываем блокировку
-        $idempotencyService = app(IdempotencyService::class);
-        $idempotencyService->acquire($idempotencyKey, 60);
+        // Перемешиваем порядок: существующие и несуществующие чередуются
+        $mixed = [
+            $existing[0], $invalid[0], $existing[1], $existing[2],
+            $invalid[1], $existing[3], $existing[4],
+        ];
 
-        $response = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => $idempotencyKey,
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Hello!',
-            'subscriber_ids' => $subscriberIds,
-        ]);
+        $response = $this->postBulk(['subscriber_ids' => $mixed]);
 
-        $response->assertStatus(409)
-            ->assertJson(['message' => 'Request is being processed']);
+        $response->assertStatus(202)
+            ->assertJsonPath('accepted', 5)
+            ->assertJsonPath('invalid_subscriber_ids', $invalid);
+
+        $this->assertDatabaseCount('msg_outbox', 1);
+
+        /** @var MsgOutbox $row */
+        $row = MsgOutbox::query()->firstOrFail();
+        $this->assertSame($existing, $row->payload['subscriber_ids']);
+    }
+
+    public function test_all_invalid_subscribers_accepts_zero_and_writes_no_outbox(): void
+    {
+        $invalid = $this->nonExistentIds(3);
+
+        $response = $this->postBulk(['subscriber_ids' => $invalid]);
+
+        $response->assertStatus(202)
+            ->assertJsonPath('accepted', 0)
+            ->assertJsonPath('invalid_subscriber_ids', $invalid);
+
+        $this->assertDatabaseCount('msg_outbox', 0);
+        $this->assertDatabaseCount('notifications', 0);
+    }
+
+    // Идемпотентность
+
+    public function test_idempotent_repeat_returns_cached_response_and_single_outbox_row(): void
+    {
+        $existing = $this->makeSubscriberIds(3);
+        $invalid = $this->nonExistentIds(1);
+        $key = Uuid::uuid4()->toString();
+
+        $first = $this->postBulk(
+            ['subscriber_ids' => array_merge($existing, $invalid)],
+            ['Idempotency-Key' => $key],
+        );
+        $first->assertStatus(202);
+
+        $second = $this->postBulk(
+            ['subscriber_ids' => array_merge($existing, $invalid)],
+            ['Idempotency-Key' => $key],
+        );
+
+        $second->assertStatus(202)
+            ->assertJsonPath('bulk_request_id', $first->json('bulk_request_id'))
+            ->assertJsonPath('accepted', $first->json('accepted'))
+            ->assertJsonPath('invalid_subscriber_ids', $first->json('invalid_subscriber_ids'));
+
+        $this->assertDatabaseCount('msg_outbox', 1);
     }
 
     public function test_missing_idempotency_key_returns_422(): void
@@ -245,135 +301,92 @@ class BulkSendNotificationTest extends TestCase
             ->assertJsonStructure(['errors' => ['idempotency_key']]);
     }
 
-    public function test_missing_subscriber_ids_returns_422_with_list(): void
+    public function test_concurrent_request_with_same_key_returns_409(): void
     {
-        $validSubscriber = Subscriber::create(['email' => 'valid@example.com']);
-        $nonExistentId = Uuid::uuid4()->toString();
+        $subscriberIds = $this->makeSubscriberIds(1);
+        $key = Uuid::uuid4()->toString();
 
-        $countBefore = Notification::count();
+        // Имитируем параллельный запрос (вручную захватываем блокировку)
+        app(IdempotencyService::class)->acquire($key, 60);
 
-        $response = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => Uuid::uuid4()->toString(),
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Hello!',
-            'subscriber_ids' => [$validSubscriber->id, $nonExistentId],
-        ]);
+        $response = $this->postBulk(
+            ['subscriber_ids' => $subscriberIds],
+            ['Idempotency-Key' => $key],
+        );
 
-        $response->assertStatus(422)
-            ->assertJsonStructure(['message', 'missing_subscriber_ids'])
-            ->assertJsonFragment(['missing_subscriber_ids' => [$nonExistentId]]);
+        $response->assertStatus(409)
+            ->assertJson(['message' => 'Request is being processed']);
 
-        $this->assertSame($countBefore, Notification::count());
+        $this->assertDatabaseCount('msg_outbox', 0);
     }
 
-    public function test_request_id_from_header_propagates(): void
+    // Сквозная трассировка request_id
+
+    public function test_request_id_from_header_propagates_to_outbox_and_message(): void
     {
         $subscriberIds = $this->makeSubscriberIds(2);
         $requestId = Uuid::uuid7()->toString();
 
-        $response = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => Uuid::uuid4()->toString(),
-            'X-Request-ID' => $requestId,
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Hello!',
-            'subscriber_ids' => $subscriberIds,
-        ]);
+        $this->postBulk(
+            ['subscriber_ids' => $subscriberIds],
+            ['X-Request-ID' => $requestId],
+        )->assertStatus(202);
 
-        $response->assertStatus(202);
+        /** @var MsgOutbox $row */
+        $row = MsgOutbox::query()->firstOrFail();
+        $this->assertSame($requestId, $row->headers['request_id']);
 
-        // request_id в каждой записи БД
-        foreach ($response->json('notification_ids') as $notificationId) {
-            $this->assertDatabaseHas('notifications', [
-                'id' => $notificationId,
-                'request_id' => $requestId,
-            ]);
-        }
+        $this->runRelay();
 
-        // request_id в application_headers сообщений RabbitMQ
-        $messages = $this->readMessages('notifications.transactional', 2);
-        $this->assertCount(2, $messages);
-        foreach ($messages as $message) {
-            $headers = $message->get('application_headers')->getNativeData();
-            $this->assertSame($requestId, $headers['request_id']);
-        }
+        $messages = $this->readFanout(2);
+        $this->assertCount(1, $messages);
+        $headers = $messages[0]->get('application_headers')->getNativeData();
+        $this->assertSame($requestId, $headers['request_id']);
     }
 
     public function test_request_id_generated_when_header_absent(): void
     {
         $subscriberIds = $this->makeSubscriberIds(2);
 
-        $response = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => Uuid::uuid4()->toString(),
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Hello!',
-            'subscriber_ids' => $subscriberIds,
-        ]);
-
+        $response = $this->postBulk(['subscriber_ids' => $subscriberIds]);
         $response->assertStatus(202);
 
-        // Все записи должны иметь одинаковый сгенерированный request_id
-        $notificationIds = $response->json('notification_ids');
-        $requestIds = Notification::whereIn('id', $notificationIds)
-            ->pluck('request_id')
-            ->unique()
-            ->values()
-            ->all();
+        /** @var MsgOutbox $row */
+        $row = MsgOutbox::query()->firstOrFail();
+        $generated = $row->headers['request_id'];
 
-        $this->assertCount(1, $requestIds);
-        $this->assertNotNull($requestIds[0]);
-
-        // UUID v7 — 36 символов в формате xxxxxxxx-xxxx-7xxx-xxxx-xxxxxxxxxxxx
         $this->assertMatchesRegularExpression(
             '/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i',
-            $requestIds[0]
+            $generated,
         );
+        // Тот же id вернулся клиенту в заголовке ответа
+        $this->assertSame($response->headers->get('X-Request-ID'), $generated);
     }
 
-    public function test_publish_failure_leaves_notifications_queued(): void
+    // Конфигурируемый лимит подписчиков
+
+    public function test_exceeding_max_subscribers_returns_422(): void
     {
-        $subscriberIds = $this->makeSubscriberIds(2);
-        $idempotencyKey = Uuid::uuid4()->toString();
+        config(['notifications.bulk.max_subscribers' => 5]);
 
-        $mockPublisher = $this->createMock(NotificationPublisherInterface::class);
-        $mockPublisher->expects($this->any())
-            ->method('publishForInitialSend')
-            ->willThrowException(new \RuntimeException('AMQP connection failed'));
+        $tooMany = $this->nonExistentIds(6);
 
-        $this->app->instance(NotificationPublisherInterface::class, $mockPublisher);
+        $response = $this->postBulk(['subscriber_ids' => $tooMany]);
 
-        $logHandler = new TestHandler;
-        Log::getLogger()->pushHandler($logHandler);
+        $response->assertStatus(422)
+            ->assertJsonStructure(['errors' => ['subscriber_ids']]);
 
-        $response = $this->withHeaders(array_merge($this->auth(), [
-            'Idempotency-Key' => $idempotencyKey,
-        ]))->postJson('/api/v1/notifications/bulk', [
-            'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
-            'message' => 'Hello!',
-            'subscriber_ids' => $subscriberIds,
-        ]);
+        $this->assertDatabaseCount('msg_outbox', 0);
+    }
 
-        $response->assertStatus(202);
+    public function test_boundary_max_subscribers_is_accepted(): void
+    {
+        config(['notifications.bulk.max_subscribers' => 5]);
 
-        // Записи в БД созданы и сохраняют статус queued
-        $this->assertDatabaseCount('notifications', 2);
-        foreach ($response->json('notification_ids') as $notificationId) {
-            $this->assertDatabaseHas('notifications', [
-                'id' => $notificationId,
-                'status' => NotificationStatus::Queued->value,
-            ]);
-        }
+        $existing = $this->makeSubscriberIds(5);
 
-        // В логах зафиксирована ошибка публикации
-        $this->assertTrue($logHandler->hasRecords(Level::Error));
-        $this->assertTrue(
-            $logHandler->hasRecordThatContains('Ошибка публикации уведомления в RabbitMQ', Level::Error)
-        );
+        $this->postBulk(['subscriber_ids' => $existing])
+            ->assertStatus(202)
+            ->assertJsonPath('accepted', 5);
     }
 }

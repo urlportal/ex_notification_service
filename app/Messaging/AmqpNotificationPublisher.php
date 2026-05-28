@@ -7,6 +7,10 @@ use PhpAmqpLib\Channel\AMQPChannel;
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Wire\AMQPTable;
 
+/**
+ * @deprecated Прямая публикация уведомлений из HTTP заменена на Transactional Outbox
+ *             (приём пишет строку в msg_outbox, публикует OutboxRelay). Удаляется в F11.
+ */
 class AmqpNotificationPublisher implements NotificationPublisherInterface
 {
     private ?AMQPChannel $channel = null;
