@@ -30,7 +30,7 @@ class BulkSendNotificationTest extends TestCase
 {
     private const TOKEN = 'phpunit-test-token';
 
-    private const FANOUT_QUEUE = 'notifications.fanout';
+    private const BULK_EXPAND_QUEUE = 'notifications.bulk-expand';
 
     private AmqpConnectionFactory $readFactory;
 
@@ -40,13 +40,13 @@ class BulkSendNotificationTest extends TestCase
         config(['auth.api_token' => self::TOKEN]);
         $this->readFactory = new AmqpConnectionFactory;
         $this->truncateTables();
-        $this->drainFanout();
+        $this->drainBulkExpand();
         Redis::flushdb();
     }
 
     protected function tearDown(): void
     {
-        $this->drainFanout();
+        $this->drainBulkExpand();
         $this->readFactory->close();
         $this->truncateTables();
         parent::tearDown();
@@ -57,10 +57,10 @@ class BulkSendNotificationTest extends TestCase
         DB::statement('TRUNCATE TABLE notifications, msg_outbox, subscribers RESTART IDENTITY CASCADE');
     }
 
-    private function drainFanout(): void
+    private function drainBulkExpand(): void
     {
         $channel = $this->readFactory->connection()->channel();
-        while ($channel->basic_get(self::FANOUT_QUEUE, no_ack: true) !== null) {
+        while ($channel->basic_get(self::BULK_EXPAND_QUEUE, no_ack: true) !== null) {
         }
         $channel->close();
     }
@@ -104,12 +104,12 @@ class BulkSendNotificationTest extends TestCase
     }
 
     /** @return array<int, AMQPMessage> */
-    private function readFanout(int $max): array
+    private function readBulkExpand(int $max): array
     {
         $channel = $this->readFactory->connection()->channel();
         $messages = [];
         for ($i = 0; $i < $max; $i++) {
-            $message = $channel->basic_get(self::FANOUT_QUEUE, no_ack: true);
+            $message = $channel->basic_get(self::BULK_EXPAND_QUEUE, no_ack: true);
             if ($message !== null) {
                 $messages[] = $message;
             }
@@ -157,8 +157,8 @@ class BulkSendNotificationTest extends TestCase
         /** @var MsgOutbox $row */
         $row = MsgOutbox::query()->firstOrFail();
         $this->assertSame(OutboxStatus::Pending, $row->status);
-        $this->assertSame('notifications.fanout.exchange', $row->exchange);
-        $this->assertSame('fanout', $row->routing_key);
+        $this->assertSame('notifications.bulk-expand.exchange', $row->exchange);
+        $this->assertSame('bulk-expand', $row->routing_key);
         $this->assertNull($row->published_at);
 
         $this->assertSame($response->json('bulk_request_id'), $row->payload['bulk_request_id']);
@@ -171,12 +171,12 @@ class BulkSendNotificationTest extends TestCase
         $this->assertSame(0, $row->headers['retry_attempt']);
 
         // До relay очередь пуста
-        $this->assertCount(0, $this->readFanout(3));
+        $this->assertCount(0, $this->readBulkExpand(3));
 
         // Публикуем через relay
         $this->runRelay();
 
-        $messages = $this->readFanout(3);
+        $messages = $this->readBulkExpand(3);
         $this->assertCount(1, $messages);
 
         $message = $messages[0];
@@ -338,7 +338,7 @@ class BulkSendNotificationTest extends TestCase
 
         $this->runRelay();
 
-        $messages = $this->readFanout(2);
+        $messages = $this->readBulkExpand(2);
         $this->assertCount(1, $messages);
         $headers = $messages[0]->get('application_headers')->getNativeData();
         $this->assertSame($requestId, $headers['request_id']);

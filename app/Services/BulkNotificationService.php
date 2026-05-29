@@ -73,8 +73,8 @@ class BulkNotificationService
             DB::transaction(function () use ($outboxId, $payload, $headers): void {
                 $this->outboxRepository->enqueue(new MsgOutboxEntry(
                     id: $outboxId,
-                    exchange: config('rabbitmq.fanout.exchange'),
-                    routingKey: config('rabbitmq.fanout.routing_key'),
+                    exchange: config('rabbitmq.bulk_expand.exchange'),
+                    routingKey: config('rabbitmq.bulk_expand.routing_key'),
                     payload: $payload,
                     headers: $headers,
                 ));

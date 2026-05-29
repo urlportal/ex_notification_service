@@ -56,4 +56,48 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
 
         return array_column($rows, 'id');
     }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $rows
+     * @return array<string, string>
+     */
+    public function upsertBulkAndReturnIds(array $rows): array
+    {
+        if ($rows === []) {
+            return [];
+        }
+
+        // Статический белый список колонок. Значения передаются через bindings.
+        $columns = [
+            'id', 'subscriber_id', 'bulk_request_id', 'channel', 'priority',
+            'status', 'message', 'idempotency_key', 'request_id',
+            'queued_at', 'created_at', 'updated_at',
+        ];
+
+        $placeholders = [];
+        $bindings = [];
+
+        foreach ($rows as $row) {
+            $placeholders[] = '('.implode(',', array_fill(0, count($columns), '?')).')';
+            foreach ($columns as $col) {
+                $bindings[] = $row[$col];
+            }
+        }
+
+        $columnList = implode(',', $columns);
+        $valueList = implode(',', $placeholders);
+
+        $sql = "INSERT INTO notifications ({$columnList}) VALUES {$valueList}"
+            .' ON CONFLICT (bulk_request_id, subscriber_id) DO UPDATE SET id = notifications.id'
+            .' RETURNING id, subscriber_id';
+
+        $result = DB::select($sql, $bindings);
+
+        $map = [];
+        foreach ($result as $row) {
+            $map[(string) $row->subscriber_id] = (string) $row->id;
+        }
+
+        return $map;
+    }
 }

@@ -8,12 +8,15 @@ return [
     'vhost' => env('RABBITMQ_VHOST', '/'),
     'tls' => (bool) env('RABBITMQ_TLS', false),
 
-    // Fanout-топология приёма массовых рассылок.
+    // Приоритетный exchange. Разводит send-команды по transactional/marketing.
+    'exchange' => env('RABBITMQ_EXCHANGE', 'notifications.exchange'),
+
+    // Bulk-expand-топология приёма массовых рассылок.
     // Одно сообщение группы публикуется сюда из msg_outbox.
     // Consumer разворачивает его в индивидуальные уведомления.
-    'fanout' => [
-        'exchange' => env('RABBITMQ_FANOUT_EXCHANGE', 'notifications.fanout.exchange'),
-        'queue' => env('RABBITMQ_FANOUT_QUEUE', 'notifications.fanout'),
-        'routing_key' => env('RABBITMQ_FANOUT_ROUTING_KEY', 'fanout'),
+    'bulk_expand' => [
+        'exchange' => env('RABBITMQ_BULK_EXPAND_EXCHANGE', 'notifications.bulk-expand.exchange'),
+        'queue' => env('RABBITMQ_BULK_EXPAND_QUEUE', 'notifications.bulk-expand'),
+        'routing_key' => env('RABBITMQ_BULK_EXPAND_ROUTING_KEY', 'bulk-expand'),
     ],
 ];

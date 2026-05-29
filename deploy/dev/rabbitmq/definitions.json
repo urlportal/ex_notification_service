@@ -44,7 +44,7 @@
       "arguments": {}
     },
     {
-      "name": "notifications.fanout.exchange",
+      "name": "notifications.bulk-expand.exchange",
       "vhost": "/",
       "type": "direct",
       "durable": true,
@@ -109,7 +109,7 @@
       }
     },
     {
-      "name": "notifications.fanout",
+      "name": "notifications.bulk-expand",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
@@ -163,11 +163,11 @@
       "arguments": {}
     },
     {
-      "source": "notifications.fanout.exchange",
+      "source": "notifications.bulk-expand.exchange",
       "vhost": "/",
-      "destination": "notifications.fanout",
+      "destination": "notifications.bulk-expand",
       "destination_type": "queue",
-      "routing_key": "fanout",
+      "routing_key": "bulk-expand",
       "arguments": {}
     }
   ]
