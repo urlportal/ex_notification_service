@@ -4,10 +4,8 @@ namespace App\Providers;
 
 use App\Logging\RequestIdContext;
 use App\Messaging\AmqpConnectionFactory;
-use App\Messaging\AmqpNotificationPublisher;
 use App\Messaging\Inbox\Eloquent\EloquentMsgInboxRepository;
 use App\Messaging\Inbox\MsgInboxRepositoryInterface;
-use App\Messaging\NotificationPublisherInterface;
 use App\Messaging\Outbox\Eloquent\EloquentMsgOutboxRepository;
 use App\Messaging\Outbox\MsgOutboxRepositoryInterface;
 use App\Messaging\Outbox\OutboxMessagePublisher;
@@ -33,7 +31,6 @@ class AppServiceProvider extends ServiceProvider
             return new IdempotencyService((int) config('idempotency.ttl'));
         });
         $this->app->singleton(AmqpConnectionFactory::class);
-        $this->app->singleton(NotificationPublisherInterface::class, AmqpNotificationPublisher::class);
 
         // Outbox-инфраструктура
         $this->app->bind(MsgOutboxRepositoryInterface::class, EloquentMsgOutboxRepository::class);
