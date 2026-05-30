@@ -117,7 +117,7 @@ services:
         CONTAINER_EXEC_USER_ID: "${CONTAINER_EXEC_USER_ID:-1000}"
         CONTAINER_EXEC_GROUP_ID: "${CONTAINER_EXEC_GROUP_ID:-1000}"
     container_name: '${APP_NAME}_workers'
-    command: supervisord -n -c /etc/supervisord.conf
+    command: /usr/local/bin/worker-entrypoint.sh
     environment:
       OUTBOX_RELAY_NUMPROCS: '${OUTBOX_RELAY_NUMPROCS:-2}'
       OUTBOX_RELAY_BATCH_SIZE: '${OUTBOX_RELAY_BATCH_SIZE:-100}'

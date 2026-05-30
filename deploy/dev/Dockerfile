@@ -51,4 +51,7 @@ RUN echo "xdebug.mode=debug" >> "$PHP_INI_DIR/conf.d/docker-php-ext-xdebug.ini" 
 
 COPY deploy/dev/supervisor/supervisord-workers.conf /etc/supervisord.conf
 
+COPY deploy/dev/worker-entrypoint.sh /usr/local/bin/worker-entrypoint.sh
+RUN chmod +x /usr/local/bin/worker-entrypoint.sh
+
 WORKDIR /app

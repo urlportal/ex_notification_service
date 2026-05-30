@@ -13,8 +13,7 @@ use Monolog\Logger;
  * - happy: валидный приоритет, очередь в брокере существует (exit 0).
  * - missing queue: валидное имя приоритета в профиле, но очередь
  *   в брокере не объявлена (exit 1), error-лог про "not declared in broker".
- * - unknown priority: имя приоритета отсутствует в профиле
- *   (exit 2 - INVALID), AMQP-соединение НЕ открывается.
+ * - unknown profile: имя профиля неверное (exit 2 - INVALID), AMQP-соединение НЕ открывается.
  */
 class PassiveDeclareTest extends SenderTestCase
 {
@@ -104,9 +103,9 @@ class PassiveDeclareTest extends SenderTestCase
         ]);
         $this->assertSame(2, $exitCode);
 
-        // В выводе artisan-команды должно быть сообщение про unknown priority.
+        // В выводе artisan-команды должно быть сообщение про unknown profile.
         $output = Artisan::output();
-        $this->assertStringContainsString("unknown priority 'no_such_priority'", $output);
+        $this->assertStringContainsString("unknown profile 'no_such_priority'", $output);
         $this->assertStringContainsString('expected one of:', $output);
 
         // Нет записей про probe queue или not declared in broker.

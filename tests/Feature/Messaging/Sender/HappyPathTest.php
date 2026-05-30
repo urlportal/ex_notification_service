@@ -60,7 +60,7 @@ class HappyPathTest extends SenderTestCase
         $this->assertSame(4, DB::table('notifications')->where('id', $notification->id)->value('attempts'));
     }
 
-    // Полная проверка unknown priority вынесена в PassiveDeclareTest;
+    // Полная проверка unknown profile вынесена в PassiveDeclareTest;
     // здесь сохраняется проверка, что неизвестное имя рассылки НЕ
     // открывает AMQP-соединение и возвращает INVALID (2).
     public function test_invalid_queue_option_exits_with_invalid(): void

@@ -127,7 +127,7 @@ class DeliveryProfileTest extends TestCase
         $profile = new DeliveryProfile(['tx' => ['queue' => 'q', 'workers' => 1, 'prefetch' => 1]]);
 
         $this->expectException(UnknownPriorityException::class);
-        $this->expectExceptionMessage('unknown priority: phantom');
+        $this->expectExceptionMessage('unknown profile: phantom');
 
         $profile->queueName('phantom');
     }

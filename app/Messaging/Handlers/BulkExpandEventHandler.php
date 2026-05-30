@@ -43,9 +43,9 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
         // fromArray бросит исключение, при невалидном JSON
         $event = BulkExpandMessage::fromArray(json_decode($message->getBody(), true));
 
-        // Имя типа рассылки проверяем здесь, а не в DTO. Сообщение с неизвестным priority уходит в DLQ.
+        // Имя профиля доставки проверяем здесь, а не в DTO. Сообщение с неизвестным priority уходит в DLQ.
         if (! $this->deliveryProfile->has($event->priority)) {
-            throw new InvalidBulkExpandPayloadException("unknown priority: {$event->priority}");
+            throw new InvalidBulkExpandPayloadException("unknown profile: {$event->priority}");
         }
 
         // Пропускаем только существующих подписчиков

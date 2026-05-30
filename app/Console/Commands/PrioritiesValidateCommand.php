@@ -25,13 +25,7 @@ class PrioritiesValidateCommand extends Command
 
     protected $description = 'Сверяет DeliveryProfile с deploy/.../rabbitmq/definitions.json.';
 
-    public function __construct(
-        private readonly DeliveryProfile $profile,
-    ) {
-        parent::__construct();
-    }
-
-    public function handle(): int
+    public function handle(DeliveryProfile $profile): int
     {
         $path = (string) $this->option('definitions-path');
         if (! is_file($path)) {
@@ -67,8 +61,8 @@ class PrioritiesValidateCommand extends Command
         $rows = [];
         $hasError = false;
 
-        foreach ($this->profile->names() as $name) {
-            $queueName = $this->profile->queueName($name);
+        foreach ($profile->names() as $name) {
+            $queueName = $profile->queueName($name);
 
             $queueCheck = 'ok';
             $q = $queuesByName[$queueName] ?? null;

@@ -126,7 +126,7 @@ final class DeliveryProfile
     public function get(string $name): DeliveryProfileConfig
     {
         if (! isset($this->byName[$name])) {
-            throw new UnknownPriorityException("unknown priority: {$name}");
+            throw new UnknownPriorityException("unknown profile: {$name}");
         }
 
         return $this->byName[$name];

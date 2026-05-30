@@ -300,7 +300,7 @@ class BulkExpandEventHandlerTest extends TestCase
             ->withArgs(function (string $msg, array $ctx) use (&$errorLogged): bool {
                 if ($msg === 'unhandled exception in handler'
                     && ($ctx['exception'] ?? null) === InvalidBulkExpandPayloadException::class
-                    && str_contains((string) ($ctx['message'] ?? ''), 'unknown priority: no_such_priority')) {
+                    && str_contains((string) ($ctx['message'] ?? ''), 'unknown profile: no_such_priority')) {
                     $errorLogged = true;
                 }
 

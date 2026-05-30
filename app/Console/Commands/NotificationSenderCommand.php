@@ -28,28 +28,27 @@ class NotificationSenderCommand extends Command
 
     public function __construct(
         private readonly AmqpConnectionFactory $amqpFactory,
-        private readonly DeliveryProfile $profile,
         private readonly LoggerInterface $logger,
     ) {
         parent::__construct();
     }
 
-    public function handle(): int
+    public function handle(DeliveryProfile $profile): int
     {
         $queueOption = (string) $this->option('queue');
 
         // --queue принимает имя типа рассылки; имя AMQP-очереди резолвится через профиль доставки.
-        if (! $this->profile->has($queueOption)) {
+        if (! $profile->has($queueOption)) {
             $this->error(sprintf(
-                "unknown type '%s', expected one of: %s",
+                "unknown profile '%s', expected one of: %s",
                 $queueOption,
-                implode(', ', $this->profile->names())
+                implode(', ', $profile->names())
             ));
 
             return self::INVALID;
         }
 
-        $queueName = $this->profile->queueName($queueOption);
+        $queueName = $profile->queueName($queueOption);
         $consumerName = "sender-{$queueOption}";
         $prefetch = (int) $this->option('prefetch');
         $maxMessages = (int) $this->option('max-messages');

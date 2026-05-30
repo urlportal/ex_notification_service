@@ -22,13 +22,12 @@ class PrioritiesCheckBrokerCommand extends Command
     protected $description = 'Проверяет, что для каждого профиля доставки есть очередь в брокере.';
 
     public function __construct(
-        private readonly DeliveryProfile $profile,
         private readonly AmqpConnectionFactory $amqpFactory,
     ) {
         parent::__construct();
     }
 
-    public function handle(): int
+    public function handle(DeliveryProfile $profile): int
     {
         try {
             $connection = $this->amqpFactory->connection();
@@ -41,8 +40,8 @@ class PrioritiesCheckBrokerCommand extends Command
         $rows = [];
         $hasError = false;
 
-        foreach ($this->profile->names() as $name) {
-            $queueName = $this->profile->queueName($name);
+        foreach ($profile->names() as $name) {
+            $queueName = $profile->queueName($name);
             $status = 'ok';
 
             try {

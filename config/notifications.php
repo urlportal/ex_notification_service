@@ -18,8 +18,9 @@ return [
     // воркеров sender-<name>: workers - numprocs supervisord,
     // prefetch - basic_qos(prefetch_count).
     // Как добавить новый профиль: записать сюда, объявить очередь и binding
-    // (routing_key=<name>) в deploy/dev/rabbitmq/definitions.json, добавить
-    // секцию supervisord, прогнать php artisan notifications:priorities:validate.
+    // (routing_key=<name>) в deploy/dev/rabbitmq/definitions.json,
+    // пересобрать/перезапустить контейнер workers (секция supervisord генерируется
+    // автоматически), прогнать php artisan notifications:priorities:validate.
     'delivery_profiles' => [
         'transactional' => [
             'queue' => env('RABBITMQ_QUEUE_TRANSACTIONAL', 'notifications.transactional'),
