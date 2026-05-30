@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\NotificationStatus;
 use App\Exceptions\NotFoundException;
 use App\Models\Notification;
 use App\Repositories\NotificationRepositoryInterface;
@@ -99,5 +100,44 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
         }
 
         return $map;
+    }
+
+    public function lockForUpdateById(string $id): ?Notification
+    {
+        // Опирается на транзакцию, открытую вызывающим кодом
+        // (AbstractIdempotentMessageHandler оборачивает handleInternal).
+        return Notification::query()->whereKey($id)->lockForUpdate()->first();
+    }
+
+    public function updateOnSent(
+        string $id,
+        string $providerMessageId,
+        \DateTimeImmutable $sentAt,
+        int $attempts,
+    ): void {
+        Notification::query()->whereKey($id)->update([
+            'status' => NotificationStatus::Sent->value,
+            'sent_at' => $sentAt,
+            'provider_message_id' => $providerMessageId,
+            'attempts' => $attempts,
+            // Сброс возможной ошибки от прежних retry-попыток.
+            'last_error' => null,
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function updateOnDropped(
+        string $id,
+        \DateTimeImmutable $droppedAt,
+        string $lastError,
+        int $attempts,
+    ): void {
+        Notification::query()->whereKey($id)->update([
+            'status' => NotificationStatus::Dropped->value,
+            'dropped_at' => $droppedAt,
+            'last_error' => $lastError,
+            'attempts' => $attempts,
+            'updated_at' => now(),
+        ]);
     }
 }

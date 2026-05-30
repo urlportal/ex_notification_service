@@ -11,6 +11,11 @@ return [
     // Приоритетный exchange. Разводит send-команды по transactional/marketing.
     'exchange' => env('RABBITMQ_EXCHANGE', 'notifications.exchange'),
 
+    'queues' => [
+        'transactional' => env('RABBITMQ_QUEUE_TRANSACTIONAL', 'notifications.transactional'),
+        'marketing' => env('RABBITMQ_QUEUE_MARKETING', 'notifications.marketing'),
+    ],
+
     // Bulk-expand-топология приёма массовых рассылок.
     // Одно сообщение группы публикуется сюда из msg_outbox.
     // Consumer разворачивает его в индивидуальные уведомления.

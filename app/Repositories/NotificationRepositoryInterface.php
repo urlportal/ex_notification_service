@@ -36,4 +36,33 @@ interface NotificationRepositoryInterface
      * @return array<string, string> [subscriber_id => actual_notification_id]
      */
     public function upsertBulkAndReturnIds(array $rows): array;
+
+    /**
+     * SELECT...FOR UPDATE по PK уведомления внутри текущей DB-транзакции.
+     * Вызывается из sender-handler под транзакцией базового
+     * AbstractIdempotentMessageHandler. Собственной транзакции не открывает.
+     */
+    public function lockForUpdateById(string $id): ?Notification;
+
+    /**
+     * UPDATE при успешной отправке: status=sent, sent_at, provider_message_id,
+     * attempts, last_error=NULL.
+     */
+    public function updateOnSent(
+        string $id,
+        string $providerMessageId,
+        \DateTimeImmutable $sentAt,
+        int $attempts,
+    ): void;
+
+    /**
+     * UPDATE при отказе провайдера: status=dropped, dropped_at, last_error,
+     * attempts. provider_message_id и sent_at не трогаются.
+     */
+    public function updateOnDropped(
+        string $id,
+        \DateTimeImmutable $droppedAt,
+        string $lastError,
+        int $attempts,
+    ): void;
 }
