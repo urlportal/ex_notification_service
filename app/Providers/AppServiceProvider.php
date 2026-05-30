@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Logging\RequestIdContext;
 use App\Messaging\AmqpConnectionFactory;
+use App\Messaging\DeliveryProfile;
 use App\Messaging\Inbox\Eloquent\EloquentMsgInboxRepository;
 use App\Messaging\Inbox\MsgInboxRepositoryInterface;
 use App\Messaging\Outbox\Eloquent\EloquentMsgOutboxRepository;
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
             return new IdempotencyService((int) config('idempotency.ttl'));
         });
         $this->app->singleton(AmqpConnectionFactory::class);
+
+        // Профиль доставки: настройки приоритета и очередей
+        $this->app->singleton(DeliveryProfile::class, fn (): DeliveryProfile => new DeliveryProfile(
+            config('notifications.delivery_profiles', [])
+        ));
 
         // Outbox-инфраструктура
         $this->app->bind(MsgOutboxRepositoryInterface::class, EloquentMsgOutboxRepository::class);

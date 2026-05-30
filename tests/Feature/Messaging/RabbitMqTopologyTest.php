@@ -2,18 +2,19 @@
 
 namespace Tests\Feature\Messaging;
 
-use App\Enums\NotificationPriority;
 use App\Messaging\AmqpConnectionFactory;
+use App\Messaging\DeliveryProfile;
 use Tests\TestCase;
 
 class RabbitMqTopologyTest extends TestCase
 {
     public function test_main_queues_declared_with_correct_args(): void
     {
+        $profile = app(DeliveryProfile::class);
         $channel = app(AmqpConnectionFactory::class)->connection()->channel();
 
-        foreach (NotificationPriority::cases() as $priority) {
-            $channel->queue_declare(queue: "notifications.$priority->value", passive: true);
+        foreach ($profile->names() as $name) {
+            $channel->queue_declare(queue: $profile->queueName($name), passive: true);
         }
 
         $channel->close();

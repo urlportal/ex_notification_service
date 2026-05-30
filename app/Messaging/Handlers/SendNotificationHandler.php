@@ -87,7 +87,7 @@ class SendNotificationHandler extends AbstractIdempotentMessageHandler
             $this->logger->info('notification sent', [
                 'notification_id' => (string) $notification->id,
                 'channel' => $notification->channel->value,
-                'priority' => $notification->priority->value,
+                'priority' => $notification->priority,
                 'provider_message_id' => $response->providerMessageId,
                 'attempts' => $retryAttempt + 1,
             ]);

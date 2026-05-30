@@ -3,7 +3,6 @@
 namespace Tests\Feature\Messaging\Sender;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Logging\RequestIdProcessor;
 use App\Models\Subscriber;
 use Illuminate\Support\Facades\Artisan;
@@ -61,7 +60,7 @@ class TraceTest extends SenderTestCase
             'X-Request-Id' => $requestId,
         ])->postJson('/api/v1/notifications/bulk', [
             'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
+            'priority' => 'transactional',
             'message' => 'trace test',
             'subscriber_ids' => $subscriberIds,
         ]);

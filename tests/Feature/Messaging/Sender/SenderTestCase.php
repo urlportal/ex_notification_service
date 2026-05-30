@@ -3,7 +3,6 @@
 namespace Tests\Feature\Messaging\Sender;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Enums\NotificationStatus;
 use App\Gateways\EmailGatewayInterface;
 use App\Gateways\GatewayResponse;
@@ -136,7 +135,7 @@ abstract class SenderTestCase extends TestCase
     /**
      * Прогоняет команду notifications:send на $maxMessages сообщений.
      *
-     * @param  'transactional'|'marketing'  $queue
+     * @param  string  $queue  имя рассылки из DeliveryProfile
      */
     protected function consume(string $queue, int $maxMessages): void
     {
@@ -171,7 +170,7 @@ abstract class SenderTestCase extends TestCase
             'id' => Uuid::uuid7()->toString(),
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Email,
-            'priority' => NotificationPriority::Transactional,
+            'priority' => 'transactional',
             'status' => NotificationStatus::Queued,
             'message' => 'test message',
             'idempotency_key' => Uuid::uuid7()->toString(),

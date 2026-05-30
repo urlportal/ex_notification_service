@@ -3,7 +3,6 @@
 namespace App\Messaging\Messages;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Exceptions\Messaging\InvalidBulkExpandPayloadException;
 
 readonly class BulkExpandMessage
@@ -12,7 +11,7 @@ readonly class BulkExpandMessage
     public function __construct(
         public string $bulkRequestId,
         public NotificationChannel $channel,
-        public NotificationPriority $priority,
+        public string $priority,
         public string $message,
         public array $subscriberIds,
         public string $idempotencyKey,
@@ -42,12 +41,10 @@ readonly class BulkExpandMessage
         $channel = NotificationChannel::tryFrom($payload['channel'])
             ?? throw new InvalidBulkExpandPayloadException("unknown channel: {$payload['channel']}");
 
-        if (! is_string($payload['priority'])) {
-            throw new InvalidBulkExpandPayloadException('priority must be a string');
+        // Тип priority проверяется здесь; валидация имени по каталогу - в handler.
+        if (! is_string($payload['priority']) || $payload['priority'] === '') {
+            throw new InvalidBulkExpandPayloadException('priority must be a non-empty string');
         }
-
-        $priority = NotificationPriority::tryFrom($payload['priority'])
-            ?? throw new InvalidBulkExpandPayloadException("unknown priority: {$payload['priority']}");
 
         if (! is_string($payload['message']) || $payload['message'] === '') {
             throw new InvalidBulkExpandPayloadException('message must be a non-empty string');
@@ -70,7 +67,7 @@ readonly class BulkExpandMessage
         return new self(
             bulkRequestId: $payload['bulk_request_id'],
             channel: $channel,
-            priority: $priority,
+            priority: $payload['priority'],
             message: $payload['message'],
             subscriberIds: array_values($payload['subscriber_ids']),
             idempotencyKey: $payload['idempotency_key'],

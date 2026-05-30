@@ -3,7 +3,6 @@
 namespace Tests\Feature\Messaging\Sender;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Enums\NotificationStatus;
 use App\Models\Notification;
 use Illuminate\Support\Facades\Artisan;
@@ -19,7 +18,7 @@ class HappyPathTest extends SenderTestCase
 
         $notification = $this->createQueuedNotification([
             'channel' => NotificationChannel::Email,
-            'priority' => NotificationPriority::Transactional,
+            'priority' => 'transactional',
             // last_error не пустой - проверим, что updateOnSent его сбросит
             'last_error' => 'previous attempt error',
         ]);
@@ -61,13 +60,15 @@ class HappyPathTest extends SenderTestCase
         $this->assertSame(4, DB::table('notifications')->where('id', $notification->id)->value('attempts'));
     }
 
-    // Невалидное значение --queue -> exit 1 без открытия соединения.
-    public function test_invalid_queue_option_exits_with_failure(): void
+    // Полная проверка unknown priority вынесена в PassiveDeclareTest;
+    // здесь сохраняется проверка, что неизвестное имя рассылки НЕ
+    // открывает AMQP-соединение и возвращает INVALID (2).
+    public function test_invalid_queue_option_exits_with_invalid(): void
     {
         $exitCode = Artisan::call('notifications:send', [
             '--queue' => 'bogus',
             '--max-messages' => 1,
         ]);
-        $this->assertSame(1, $exitCode);
+        $this->assertSame(2, $exitCode);
     }
 }

@@ -3,7 +3,6 @@
 namespace Tests\Feature\Notifications;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Enums\NotificationStatus;
 use App\Models\Notification;
 use App\Models\Subscriber;
@@ -35,7 +34,7 @@ class ShowNotificationTest extends TestCase
         $notification = Notification::create([
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
+            'priority' => 'transactional',
             'status' => NotificationStatus::Delivered->value,
             'message' => 'Your order is confirmed',
             'idempotency_key' => 'key-abc-123',
@@ -68,7 +67,7 @@ class ShowNotificationTest extends TestCase
         $notification = Notification::create([
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Sms->value,
-            'priority' => NotificationPriority::Marketing->value,
+            'priority' => 'marketing',
             'status' => NotificationStatus::Queued->value,
             'message' => 'Hello',
         ]);

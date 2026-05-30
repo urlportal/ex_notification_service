@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Enums\NotificationStatus;
 use App\Models\Traits\HasUuidV7;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +37,6 @@ class Notification extends Model
 
     protected $casts = [
         'channel' => NotificationChannel::class,
-        'priority' => NotificationPriority::class,
         'status' => NotificationStatus::class,
         'queued_at' => 'datetime',
         'sent_at' => 'datetime',

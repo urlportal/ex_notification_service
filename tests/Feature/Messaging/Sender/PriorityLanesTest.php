@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Messaging\Sender;
 
-use App\Enums\NotificationPriority;
 use Illuminate\Support\Facades\DB;
 
 class PriorityLanesTest extends SenderTestCase
@@ -16,7 +15,7 @@ class PriorityLanesTest extends SenderTestCase
         $transactionalIds = [];
         for ($i = 0; $i < 2; $i++) {
             $notification = $this->createQueuedNotification([
-                'priority' => NotificationPriority::Transactional,
+                'priority' => 'transactional',
             ]);
             $transactionalIds[] = (string) $notification->id;
             $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
@@ -25,7 +24,7 @@ class PriorityLanesTest extends SenderTestCase
         $marketingIds = [];
         for ($i = 0; $i < 5; $i++) {
             $notification = $this->createQueuedNotification([
-                'priority' => NotificationPriority::Marketing,
+                'priority' => 'marketing',
             ]);
             $marketingIds[] = (string) $notification->id;
             $this->publishSend((string) $notification->id, self::QUEUE_MARKETING);

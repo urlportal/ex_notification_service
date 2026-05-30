@@ -63,7 +63,7 @@ class BulkNotificationService
             $payload = [
                 'bulk_request_id' => $bulkRequestId,
                 'channel' => $dto->channel->value,
-                'priority' => $dto->priority->value,
+                'priority' => $dto->priority,
                 'message' => $dto->message,
                 'subscriber_ids' => $acceptedIds,
                 'idempotency_key' => $dto->idempotencyKey,

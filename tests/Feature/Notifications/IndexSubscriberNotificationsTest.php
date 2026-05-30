@@ -3,7 +3,6 @@
 namespace Tests\Feature\Notifications;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Enums\NotificationStatus;
 use App\Models\Notification;
 use App\Models\Subscriber;
@@ -38,7 +37,7 @@ class IndexSubscriberNotificationsTest extends TestCase
         return Notification::create(array_merge([
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
+            'priority' => 'transactional',
             'status' => NotificationStatus::Queued->value,
             'message' => 'Test message',
         ], $attrs));
@@ -95,8 +94,8 @@ class IndexSubscriberNotificationsTest extends TestCase
 
     public function test_filters_by_priority(): void
     {
-        $this->makeNotification($this->subscriber, ['priority' => NotificationPriority::Marketing->value]);
-        $this->makeNotification($this->subscriber, ['priority' => NotificationPriority::Transactional->value]);
+        $this->makeNotification($this->subscriber, ['priority' => 'marketing']);
+        $this->makeNotification($this->subscriber, ['priority' => 'transactional']);
 
         $response = $this->withHeaders($this->auth())
             ->getJson("/api/v1/subscribers/{$this->subscriber->id}/notifications?priority=marketing");
@@ -235,5 +234,15 @@ class IndexSubscriberNotificationsTest extends TestCase
         DB::disableQueryLog();
 
         $this->assertCount(3, $queries, 'Expected exactly 3 queries (subscriber lookup + COUNT + SELECT), got '.count($queries));
+    }
+
+    // Фильтр priority вне DeliveryProfile отклоняется с 422.
+    public function test_unknown_priority_filter_returns_422(): void
+    {
+        $response = $this->withHeaders($this->auth())
+            ->getJson("/api/v1/subscribers/{$this->subscriber->id}/notifications?priority=no_such_priority");
+
+        $response->assertStatus(422)
+            ->assertJsonStructure(['errors' => ['priority']]);
     }
 }

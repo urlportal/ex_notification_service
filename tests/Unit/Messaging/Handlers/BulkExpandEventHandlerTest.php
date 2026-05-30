@@ -2,7 +2,9 @@
 
 namespace Tests\Unit\Messaging\Handlers;
 
+use App\Exceptions\Messaging\InvalidBulkExpandPayloadException;
 use App\Logging\RequestIdContext;
+use App\Messaging\DeliveryProfile;
 use App\Messaging\Handlers\BulkExpandEventHandler;
 use App\Messaging\Inbox\MsgInboxRepositoryInterface;
 use App\Messaging\Outbox\MsgOutboxEntry;
@@ -34,6 +36,8 @@ class BulkExpandEventHandlerTest extends TestCase
     private MockInterface $logger;
 
     private AMQPChannel $channelMock;
+
+    private DeliveryProfile $deliveryProfile;
 
     private BulkExpandEventHandler $handler;
 
@@ -74,6 +78,11 @@ class BulkExpandEventHandlerTest extends TestCase
         /** @var MsgOutboxRepositoryInterface $outboxRepo */
         $outboxRepo = $this->outboxRepo;
 
+        $this->deliveryProfile = new DeliveryProfile([
+            'transactional' => ['queue' => 'notifications.transactional', 'workers' => 2, 'prefetch' => 10],
+            'marketing' => ['queue' => 'notifications.marketing', 'workers' => 4, 'prefetch' => 10],
+        ]);
+
         $this->handler = new BulkExpandEventHandler(
             inbox: $inbox,
             db: $db,
@@ -82,6 +91,7 @@ class BulkExpandEventHandlerTest extends TestCase
             subscriberRepo: $subscriberRepo,
             notificationRepo: $notificationRepo,
             outboxRepo: $outboxRepo,
+            deliveryProfile: $this->deliveryProfile,
         );
 
         $channelMock = Mockery::mock(AMQPChannel::class);
@@ -276,5 +286,34 @@ class BulkExpandEventHandlerTest extends TestCase
         $this->handler->handle($this->makeMessage([]));
 
         $this->assertTrue($logCalled, 'info-лог bulk expand event processed должен быть вызван с created_count=0');
+    }
+
+    public function test_unknown_priority_in_payload_routes_to_dlq(): void
+    {
+        // Payload содержит валидный по структуре, но отсутствующий в каталоге
+        // priority. handleInternal бросает InvalidBulkExpandPayloadException;
+        // базовый handle() логирует и делает nack(requeue=false), сообщение
+        // уходит в DLQ через x-dead-letter-exchange.
+        $errorLogged = false;
+        $this->logger->shouldReceive('error')
+            ->once()
+            ->withArgs(function (string $msg, array $ctx) use (&$errorLogged): bool {
+                if ($msg === 'unhandled exception in handler'
+                    && ($ctx['exception'] ?? null) === InvalidBulkExpandPayloadException::class
+                    && str_contains((string) ($ctx['message'] ?? ''), 'unknown priority: no_such_priority')) {
+                    $errorLogged = true;
+                }
+
+                return true;
+            });
+
+        $message = $this->makeMessage(
+            subscriberIds: [Uuid::uuid7()->toString()],
+            priority: 'no_such_priority',
+        );
+
+        $this->handler->handle($message);
+
+        $this->assertTrue($errorLogged, 'error-лог должен содержать InvalidBulkExpandPayloadException');
     }
 }

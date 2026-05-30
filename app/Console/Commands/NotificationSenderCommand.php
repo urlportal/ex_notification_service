@@ -3,20 +3,24 @@
 namespace App\Console\Commands;
 
 use App\Messaging\AmqpConnectionFactory;
+use App\Messaging\DeliveryProfile;
 use App\Messaging\Handlers\SendNotificationHandler;
 use Illuminate\Console\Command;
+use PhpAmqpLib\Exception\AMQPProtocolChannelException;
 use PhpAmqpLib\Exception\AMQPTimeoutException;
 use PhpAmqpLib\Message\AMQPMessage;
+use Psr\Log\LoggerInterface;
 
 /**
  * Sender-consumer. Читает send-команды из приоритетной очереди и через
  * SendNotificationHandler вызывает канальный gateway. Одна команда обслуживает
- * две (transactional / marketing). Выбор через --queue.
+ * все типы рассылок (transactional, marketing, ...). Выбор через --queue
+ * (имя типа из config/notifications.php).
  */
 class NotificationSenderCommand extends Command
 {
     protected $signature = 'notifications:send
-        {--queue= : transactional или marketing}
+        {--queue= : профиль из DeliveryProfile}
         {--prefetch=10 : prefetch_count для basic_qos}
         {--max-messages=0 : 0 = бесконечно; >0 для детерминированных тестов}';
 
@@ -24,6 +28,8 @@ class NotificationSenderCommand extends Command
 
     public function __construct(
         private readonly AmqpConnectionFactory $amqpFactory,
+        private readonly DeliveryProfile $profile,
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -31,14 +37,19 @@ class NotificationSenderCommand extends Command
     public function handle(): int
     {
         $queueOption = (string) $this->option('queue');
-        $queueName = config("rabbitmq.queues.{$queueOption}");
 
-        if (! is_string($queueName) || $queueName === '') {
-            $this->error('invalid queue value');
+        // --queue принимает имя типа рассылки; имя AMQP-очереди резолвится через профиль доставки.
+        if (! $this->profile->has($queueOption)) {
+            $this->error(sprintf(
+                "unknown type '%s', expected one of: %s",
+                $queueOption,
+                implode(', ', $this->profile->names())
+            ));
 
-            return self::FAILURE;
+            return self::INVALID;
         }
 
+        $queueName = $this->profile->queueName($queueOption);
         $consumerName = "sender-{$queueOption}";
         $prefetch = (int) $this->option('prefetch');
         $maxMessages = (int) $this->option('max-messages');
@@ -58,7 +69,54 @@ class NotificationSenderCommand extends Command
             'consumerName' => $consumerName,
         ]);
 
-        $channel = $this->amqpFactory->connection()->channel();
+        $connection = $this->amqpFactory->connection();
+
+        // Проверяем существование очереди на отдельном probe-channel ДО basic_consume.
+        // После 404 RabbitMQ закрывает channel, поэтому используется именно
+        // отдельный probe (основной channel создаётся ниже).
+        try {
+            $probeChannel = $connection->channel();
+            $probeChannel->queue_declare($queueName, true);
+            $probeChannel->close();
+            // @phpstan-ignore-next-line catch.neverThrown - php-amqplib не объявляет throws, но реально бросает на 404.
+        } catch (AMQPProtocolChannelException $e) {
+            if ($e->amqp_reply_code === 404) {
+                $this->logger->error(
+                    "queue '{$queueName}' not declared in broker, request topology change from DevOps",
+                    [
+                        'queue' => $queueName,
+                        'priority' => $queueOption,
+                        'reply_code' => $e->amqp_reply_code,
+                    ],
+                );
+            } else {
+                $this->logger->error(
+                    'passive_declare failed: '.$e->amqp_reply_text,
+                    [
+                        'queue' => $queueName,
+                        'priority' => $queueOption,
+                        'reply_code' => $e->amqp_reply_code,
+                    ],
+                );
+            }
+            $this->amqpFactory->close();
+
+            return self::FAILURE;
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'cannot probe queue: '.$e->getMessage(),
+                [
+                    'queue' => $queueName,
+                    'priority' => $queueOption,
+                    'exception' => $e::class,
+                ],
+            );
+            $this->amqpFactory->close();
+
+            return self::FAILURE;
+        }
+
+        $channel = $connection->channel();
         $channel->basic_qos(0, $prefetch, false);
 
         $tag = $channel->basic_consume(

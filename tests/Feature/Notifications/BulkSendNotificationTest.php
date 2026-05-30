@@ -3,7 +3,6 @@
 namespace Tests\Feature\Notifications;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Messaging\AmqpConnectionFactory;
 use App\Messaging\Outbox\MsgOutbox;
 use App\Messaging\Outbox\OutboxStatus;
@@ -128,7 +127,7 @@ class BulkSendNotificationTest extends TestCase
     {
         $defaults = [
             'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Transactional->value,
+            'priority' => 'transactional',
             'message' => 'Hello, subscriber!',
         ];
 
@@ -163,7 +162,7 @@ class BulkSendNotificationTest extends TestCase
 
         $this->assertSame($response->json('bulk_request_id'), $row->payload['bulk_request_id']);
         $this->assertSame(NotificationChannel::Email->value, $row->payload['channel']);
-        $this->assertSame(NotificationPriority::Transactional->value, $row->payload['priority']);
+        $this->assertSame('transactional', $row->payload['priority']);
         $this->assertSame('Hello, subscriber!', $row->payload['message']);
         $this->assertSame($subscriberIds, $row->payload['subscriber_ids']);
         $this->assertArrayHasKey('idempotency_key', $row->payload);
@@ -292,7 +291,7 @@ class BulkSendNotificationTest extends TestCase
         $response = $this->withHeaders($this->auth())
             ->postJson('/api/v1/notifications/bulk', [
                 'channel' => NotificationChannel::Email->value,
-                'priority' => NotificationPriority::Transactional->value,
+                'priority' => 'transactional',
                 'message' => 'Hello!',
                 'subscriber_ids' => $subscriberIds,
             ]);
@@ -388,5 +387,21 @@ class BulkSendNotificationTest extends TestCase
         $this->postBulk(['subscriber_ids' => $existing])
             ->assertStatus(202)
             ->assertJsonPath('accepted', 5);
+    }
+
+    // Значение priority вне DeliveryProfile отклоняется с 422.
+    public function test_unknown_priority_returns_422(): void
+    {
+        $existing = $this->makeSubscriberIds(1);
+
+        $response = $this->postBulk([
+            'priority' => 'no_such_priority',
+            'subscriber_ids' => $existing,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonStructure(['errors' => ['priority']]);
+
+        $this->assertDatabaseCount('msg_outbox', 0);
     }
 }

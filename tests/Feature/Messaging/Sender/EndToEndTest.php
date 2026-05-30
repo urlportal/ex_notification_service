@@ -3,7 +3,6 @@
 namespace Tests\Feature\Messaging\Sender;
 
 use App\Enums\NotificationChannel;
-use App\Enums\NotificationPriority;
 use App\Models\Subscriber;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +45,7 @@ class EndToEndTest extends SenderTestCase
             'X-Request-Id' => Uuid::uuid7()->toString(),
         ])->postJson('/api/v1/notifications/bulk', [
             'channel' => NotificationChannel::Email->value,
-            'priority' => NotificationPriority::Marketing->value,
+            'priority' => 'marketing',
             'message' => 'end-to-end',
             'subscriber_ids' => $subscriberIds,
         ]);

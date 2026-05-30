@@ -174,6 +174,8 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'subscriber_id', type: 'string', format: 'uuid', example: '019600a2-7c3b-7000-9f3b-000000000001'),
         new OA\Property(property: 'bulk_request_id', type: 'string', format: 'uuid', example: null, nullable: true),
         new OA\Property(property: 'channel', type: 'string', example: 'email', enum: ['sms', 'email']),
+        // Внимание: enum приоритетов дублирует config/notifications.php.
+        // При добавлении нового приоритета обновлять руками.
         new OA\Property(property: 'priority', type: 'string', example: 'transactional', enum: ['transactional', 'marketing']),
         new OA\Property(property: 'status', type: 'string', example: 'delivered', enum: ['queued', 'sent', 'delivered', 'dropped']),
         new OA\Property(property: 'message', type: 'string', example: 'Ваш заказ подтверждён'),
@@ -206,6 +208,8 @@ use OpenApi\Attributes as OA;
     required: ['channel', 'priority', 'message', 'subscriber_ids'],
     properties: [
         new OA\Property(property: 'channel', type: 'string', example: 'email', enum: ['sms', 'email']),
+        // Внимание: enum приоритетов дублирует config/notifications.php.
+        // При добавлении нового приоритета обновлять руками.
         new OA\Property(property: 'priority', type: 'string', example: 'transactional', enum: ['transactional', 'marketing']),
         new OA\Property(property: 'message', type: 'string', example: 'Ваш заказ подтверждён', maxLength: 1000, minLength: 1),
         new OA\Property(

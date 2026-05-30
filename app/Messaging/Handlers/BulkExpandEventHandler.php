@@ -3,8 +3,10 @@
 namespace App\Messaging\Handlers;
 
 use App\Enums\NotificationStatus;
+use App\Exceptions\Messaging\InvalidBulkExpandPayloadException;
 use App\Logging\RequestIdContext;
 use App\Messaging\AbstractIdempotentMessageHandler;
+use App\Messaging\DeliveryProfile;
 use App\Messaging\Inbox\MsgInboxRepositoryInterface;
 use App\Messaging\Messages\BulkExpandMessage;
 use App\Messaging\Outbox\MsgOutboxEntry;
@@ -26,6 +28,7 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
         private readonly SubscriberRepositoryInterface $subscriberRepo,
         private readonly NotificationRepositoryInterface $notificationRepo,
         private readonly MsgOutboxRepositoryInterface $outboxRepo,
+        private readonly DeliveryProfile $deliveryProfile,
     ) {
         parent::__construct($inbox, $db, $logger, $requestIdContext);
     }
@@ -39,6 +42,11 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
     {
         // fromArray бросит исключение, при невалидном JSON
         $event = BulkExpandMessage::fromArray(json_decode($message->getBody(), true));
+
+        // Имя типа рассылки проверяем здесь, а не в DTO. Сообщение с неизвестным priority уходит в DLQ.
+        if (! $this->deliveryProfile->has($event->priority)) {
+            throw new InvalidBulkExpandPayloadException("unknown priority: {$event->priority}");
+        }
 
         // Пропускаем только существующих подписчиков
         $existing = array_flip($this->subscriberRepo->findExistingIds($event->subscriberIds));
@@ -61,7 +69,7 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
                 'subscriber_id' => $sid,
                 'bulk_request_id' => $event->bulkRequestId,
                 'channel' => $event->channel->value,
-                'priority' => $event->priority->value,
+                'priority' => $event->priority,
                 'status' => NotificationStatus::Queued->value,
                 'message' => $event->message,
                 'idempotency_key' => $event->idempotencyKey,
@@ -78,7 +86,7 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
                 $entries[] = new MsgOutboxEntry(
                     id: Uuid::uuid7()->toString(),
                     exchange: $sendExchange,
-                    routingKey: $event->priority->value,
+                    routingKey: $event->priority,
                     payload: ['notification_id' => $idBySubscriber[$sid]],
                     headers: ['request_id' => $requestId, 'retry_attempt' => 0],
                 );

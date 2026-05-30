@@ -37,6 +37,8 @@ use OpenApi\Attributes as OA;
             required: false,
             schema: new OA\Schema(type: 'string', enum: ['sms', 'email'], example: 'email')
         ),
+        // Внимание: enum приоритетов дублирует config/notifications.php.
+        // При добавлении нового приоритета обновлять руками.
         new OA\Parameter(
             name: 'priority',
             description: 'Фильтр по приоритету (одно значение)',
