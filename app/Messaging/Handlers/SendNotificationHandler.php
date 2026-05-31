@@ -10,10 +10,13 @@ use App\Logging\RequestIdContext;
 use App\Messaging\AbstractIdempotentMessageHandler;
 use App\Messaging\Inbox\MsgInboxRepositoryInterface;
 use App\Messaging\Messages\SendNotificationCommand;
+use App\Messaging\Outbox\MsgOutboxEntry;
+use App\Messaging\Outbox\MsgOutboxRepositoryInterface;
 use App\Repositories\NotificationRepositoryInterface;
 use Illuminate\Database\DatabaseManager;
 use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerInterface;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Обрабатывает send-команды из приоритетной очереди.
@@ -33,6 +36,7 @@ class SendNotificationHandler extends AbstractIdempotentMessageHandler
         private readonly string $consumerName,
         private readonly NotificationRepositoryInterface $notificationRepo,
         private readonly GatewayFactory $gatewayFactory,
+        private readonly MsgOutboxRepositoryInterface $outboxRepo,
     ) {
         parent::__construct($inbox, $db, $logger, $requestIdContext);
     }
@@ -91,9 +95,8 @@ class SendNotificationHandler extends AbstractIdempotentMessageHandler
                 'provider_message_id' => $response->providerMessageId,
                 'attempts' => $retryAttempt + 1,
             ]);
-        } catch (PermanentGatewayException|TemporaryGatewayException $e) {
-            // Временная ошибка ведёт себя как постоянная.
-            // Ветка TemporaryGatewayException будет заменена на retry-публикацию.
+        } catch (PermanentGatewayException $e) {
+            // Permanent на любой попытке: сразу dropped, retry не публикуется.
             $this->notificationRepo->updateOnDropped(
                 id: (string) $notification->id,
                 droppedAt: now()->toDateTimeImmutable(),
@@ -105,6 +108,54 @@ class SendNotificationHandler extends AbstractIdempotentMessageHandler
                 'reason' => $e::class,
                 'attempts' => $retryAttempt + 1,
             ]);
+        } catch (TemporaryGatewayException $e) {
+            $attempts = $retryAttempt + 1;
+            $maxAttempts = (int) config('notifications.retry.max_attempts');
+            $levels = (array) config('notifications.retry.levels');
+
+            if ($attempts < $maxAttempts) {
+                // Накопить попытку, опубликовать retry-копию в outbox, оставить статус queued.
+                $nextLevel = (string) $levels[$attempts]['key'];
+
+                $this->notificationRepo->updateAttemptsAndError(
+                    id: (string) $notification->id,
+                    attempts: $attempts,
+                    lastError: $e->getMessage(),
+                );
+
+                $this->outboxRepo->enqueue(new MsgOutboxEntry(
+                    id: Uuid::uuid7()->toString(),
+                    exchange: (string) config('rabbitmq.retry.exchange'),
+                    routingKey: $nextLevel.'.'.$notification->priority,
+                    payload: ['notification_id' => (string) $notification->id],
+                    headers: [
+                        'request_id' => (string) ($headers['request_id'] ?? ''),
+                        'retry_attempt' => $attempts,
+                    ],
+                ));
+
+                $this->logger->warning('notification retry scheduled', [
+                    'notification_id' => (string) $notification->id,
+                    'channel' => $notification->channel->value,
+                    'priority' => $notification->priority,
+                    'attempts' => $attempts,
+                    'next_level' => $nextLevel,
+                    'last_error' => $e->getMessage(),
+                ]);
+            } else {
+                // Попытки исчерпаны, финализируем dropped.
+                $this->notificationRepo->updateOnDropped(
+                    id: (string) $notification->id,
+                    droppedAt: now()->toDateTimeImmutable(),
+                    lastError: $e->getMessage(),
+                    attempts: $attempts,
+                );
+                $this->logger->warning('notification dropped', [
+                    'notification_id' => (string) $notification->id,
+                    'reason' => $e::class.':exhaustion',
+                    'attempts' => $attempts,
+                ]);
+            }
         }
 
         // Любой иной Throwable (ошибка БД, неизвестный channel в GatewayFactory

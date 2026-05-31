@@ -78,25 +78,75 @@
       }
     },
     {
-      "name": "notifications.retry.1",
+      "name": "notifications.retry.30s.transactional",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-queue-type": "classic",
         "x-message-ttl": 30000,
-        "x-dead-letter-exchange": "notifications.exchange"
+        "x-dead-letter-exchange": "notifications.exchange",
+        "x-dead-letter-routing-key": "transactional"
       }
     },
     {
-      "name": "notifications.retry.2",
+      "name": "notifications.retry.30s.marketing",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "notifications.exchange",
+        "x-dead-letter-routing-key": "marketing"
+      }
+    },
+    {
+      "name": "notifications.retry.5m.transactional",
       "vhost": "/",
       "durable": true,
       "auto_delete": false,
       "arguments": {
         "x-queue-type": "classic",
         "x-message-ttl": 300000,
-        "x-dead-letter-exchange": "notifications.exchange"
+        "x-dead-letter-exchange": "notifications.exchange",
+        "x-dead-letter-routing-key": "transactional"
+      }
+    },
+    {
+      "name": "notifications.retry.5m.marketing",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 300000,
+        "x-dead-letter-exchange": "notifications.exchange",
+        "x-dead-letter-routing-key": "marketing"
+      }
+    },
+    {
+      "name": "notifications.retry.30m.transactional",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "notifications.exchange",
+        "x-dead-letter-routing-key": "transactional"
+      }
+    },
+    {
+      "name": "notifications.retry.30m.marketing",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 1800000,
+        "x-dead-letter-exchange": "notifications.exchange",
+        "x-dead-letter-routing-key": "marketing"
       }
     },
     {
@@ -141,17 +191,49 @@
     {
       "source": "notifications.retry.exchange",
       "vhost": "/",
-      "destination": "notifications.retry.1",
+      "destination": "notifications.retry.30s.transactional",
       "destination_type": "queue",
-      "routing_key": "1",
+      "routing_key": "30s.transactional",
       "arguments": {}
     },
     {
       "source": "notifications.retry.exchange",
       "vhost": "/",
-      "destination": "notifications.retry.2",
+      "destination": "notifications.retry.30s.marketing",
       "destination_type": "queue",
-      "routing_key": "2",
+      "routing_key": "30s.marketing",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.retry.exchange",
+      "vhost": "/",
+      "destination": "notifications.retry.5m.transactional",
+      "destination_type": "queue",
+      "routing_key": "5m.transactional",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.retry.exchange",
+      "vhost": "/",
+      "destination": "notifications.retry.5m.marketing",
+      "destination_type": "queue",
+      "routing_key": "5m.marketing",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.retry.exchange",
+      "vhost": "/",
+      "destination": "notifications.retry.30m.transactional",
+      "destination_type": "queue",
+      "routing_key": "30m.transactional",
+      "arguments": {}
+    },
+    {
+      "source": "notifications.retry.exchange",
+      "vhost": "/",
+      "destination": "notifications.retry.30m.marketing",
+      "destination_type": "queue",
+      "routing_key": "30m.marketing",
       "arguments": {}
     },
     {

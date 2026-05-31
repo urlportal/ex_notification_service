@@ -65,4 +65,14 @@ interface NotificationRepositoryInterface
         string $lastError,
         int $attempts,
     ): void;
+
+    /**
+     * UPDATE между попытками: status НЕ меняется, обновляются только attempts
+     * и last_error. Используется при принятии решения о retry
+     */
+    public function updateAttemptsAndError(
+        string $id,
+        int $attempts,
+        string $lastError,
+    ): void;
 }

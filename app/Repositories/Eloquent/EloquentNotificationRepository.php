@@ -140,4 +140,13 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
             'updated_at' => now(),
         ]);
     }
+
+    public function updateAttemptsAndError(string $id, int $attempts, string $lastError): void
+    {
+        Notification::query()->whereKey($id)->update([
+            'attempts' => $attempts,
+            'last_error' => $lastError,
+            'updated_at' => now(),
+        ]);
+    }
 }

@@ -1,0 +1,6 @@
+services:
+
+  rabbitmq:
+    volumes:
+      - ./deploy/dev/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./deploy/test/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro

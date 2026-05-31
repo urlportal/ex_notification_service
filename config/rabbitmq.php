@@ -22,4 +22,12 @@ return [
         'queue' => env('RABBITMQ_BULK_EXPAND_QUEUE', 'notifications.bulk-expand'),
         'routing_key' => env('RABBITMQ_BULK_EXPAND_ROUTING_KEY', 'bulk-expand'),
     ],
+
+    // Retry-exchange для копий send-команд при временном сбое gateway.
+    // Sender формирует MsgOutboxEntry::exchange со значением отсюда; OutboxRelay
+    // публикует копию в этот exchange с routing_key вида <level>.<priority>
+    // (см. notifications.retry в config/notifications.php).
+    'retry' => [
+        'exchange' => env('RABBITMQ_RETRY_EXCHANGE', 'notifications.retry.exchange'),
+    ],
 ];

@@ -33,6 +33,20 @@ abstract class SenderTestCase extends TestCase
 
     protected const string DLQ = 'notifications.dlq';
 
+    protected const string RETRY_EXCHANGE = 'notifications.retry.exchange';
+
+    // Шесть retry-очередей вида notifications.retry.<level>.<priority>.
+    // Их нужно очищать в setUp/tearDown, чтобы остатки от предыдущего теста
+    // не вернулись в основную очередь через DL routing-key и не нарушили изоляцию.
+    protected const array RETRY_QUEUES = [
+        'notifications.retry.30s.transactional',
+        'notifications.retry.30s.marketing',
+        'notifications.retry.5m.transactional',
+        'notifications.retry.5m.marketing',
+        'notifications.retry.30m.transactional',
+        'notifications.retry.30m.marketing',
+    ];
+
     protected AmqpConnectionFactory $amqpFactory;
 
     protected function setUp(): void
@@ -43,6 +57,9 @@ abstract class SenderTestCase extends TestCase
         $this->drainQueue(self::QUEUE_TRANSACTIONAL);
         $this->drainQueue(self::QUEUE_MARKETING);
         $this->drainQueue(self::DLQ);
+        foreach (self::RETRY_QUEUES as $retryQueue) {
+            $this->drainQueue($retryQueue);
+        }
     }
 
     protected function tearDown(): void
@@ -50,6 +67,9 @@ abstract class SenderTestCase extends TestCase
         $this->drainQueue(self::QUEUE_TRANSACTIONAL);
         $this->drainQueue(self::QUEUE_MARKETING);
         $this->drainQueue(self::DLQ);
+        foreach (self::RETRY_QUEUES as $retryQueue) {
+            $this->drainQueue($retryQueue);
+        }
         $this->amqpFactory->close();
         $this->truncateTables();
         parent::tearDown();

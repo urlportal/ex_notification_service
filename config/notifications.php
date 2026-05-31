@@ -33,4 +33,24 @@ return [
             'prefetch' => (int) env('SENDER_MK_PREFETCH', 10),
         ],
     ],
+
+    // Retry-механизм при временных сбоях gateway.
+    // max_attempts - общее число попыток доставки (1 исходная + retry). По умолчанию 4.
+    // levels - упорядоченные уровни backoff. Индекс массива (1-based) обозначает
+    // номер только что выполненной попытки: после первой неудачи берётся levels[1],
+    // после второй - levels[2] и так далее. key - суффикс routing_key retry-копии
+    // (<key>.<priority>) и часть имени retry-очереди (notifications.retry.<key>.<priority>).
+    // ttl_ms дублирует фактическое значение x-message-ttl соответствующей retry-очереди
+    // в deploy/dev/rabbitmq/definitions.json. Приложение TTL не применяет, его задаёт
+    // брокер. Изменение ttl_ms без правки definitions.json не повлияет на backoff.
+    // Инвариант: count(levels) + 1 === max_attempts. Иначе RetryConfigServiceProvider
+    // валит boot приложения.
+    'retry' => [
+        'max_attempts' => (int) env('RETRY_MAX_ATTEMPTS', 4),
+        'levels' => [
+            1 => ['key' => '30s', 'ttl_ms' => (int) env('RETRY_30S_TTL_MS', 30000)],
+            2 => ['key' => '5m', 'ttl_ms' => (int) env('RETRY_5M_TTL_MS', 300000)],
+            3 => ['key' => '30m', 'ttl_ms' => (int) env('RETRY_30M_TTL_MS', 1800000)],
+        ],
+    ],
 ];

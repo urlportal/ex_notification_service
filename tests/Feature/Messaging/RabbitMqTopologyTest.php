@@ -25,9 +25,17 @@ class RabbitMqTopologyTest extends TestCase
     {
         $channel = app(AmqpConnectionFactory::class)->connection()->channel();
 
-        $channel->queue_declare(queue: 'notifications.retry.1', passive: true);
-
-        $channel->queue_declare(queue: 'notifications.retry.2', passive: true);
+        // Шесть retry-очередей вида notifications.retry.<level>.<priority>.
+        // Каждая объявлена в definitions.json с собственным TTL и
+        // x-dead-letter-routing-key, равным имени соответствующего приоритета.
+        foreach (['30s', '5m', '30m'] as $level) {
+            foreach (['transactional', 'marketing'] as $priority) {
+                $channel->queue_declare(
+                    queue: "notifications.retry.{$level}.{$priority}",
+                    passive: true,
+                );
+            }
+        }
 
         $channel->close();
         $this->addToAssertionCount(1);
