@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Callbacks;
 
+use App\Services\Callbacks\CallbackAdapterRegistry;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
@@ -23,6 +24,7 @@ class MiddlewareTest extends TestCase
 
         config(['notifications.callbacks.mailgun.signing_key' => $signingKey]);
         config(['notifications.callbacks.mailgun.replay_window_seconds' => 300]);
+        app()->forgetInstance(CallbackAdapterRegistry::class);
 
         $signature = hash_hmac('sha256', $timestamp.$token, $signingKey);
 

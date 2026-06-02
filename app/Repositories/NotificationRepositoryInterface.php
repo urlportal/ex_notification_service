@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Enums\NotificationChannel;
 use App\Models\Notification;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -17,7 +18,19 @@ interface NotificationRepositoryInterface
 
     public function findByIdempotencyKey(string $key): ?Notification;
 
-    public function findByProviderMessageId(string $id): ?Notification;
+    public function findByProviderMessageId(string $providerMessageId, NotificationChannel $channel): ?Notification;
+
+    /**
+     * UPDATE при получении callback доставки: status=delivered, delivered_at.
+     * Счётчик attempts не изменяется.
+     */
+    public function markDelivered(string $id, \DateTimeImmutable $deliveredAt): void;
+
+    /**
+     * UPDATE при получении callback отклонения: status=dropped, dropped_at, last_error.
+     * Счётчик attempts не изменяется.
+     */
+    public function markDroppedFromCallback(string $id, \DateTimeImmutable $droppedAt, string $error): void;
 
     /**
      * Создаёт N уведомлений одним SQL INSERT.

@@ -25,6 +25,164 @@
         }
     ],
     "paths": {
+        "/callbacks/{adapter}": {
+            "post": {
+                "tags": [
+                    "Callbacks"
+                ],
+                "summary": "Приём webhook-callback от провайдера рассылки",
+                "description": "Публичный webhook-endpoint для приёма callback от провайдеров рассылки.\nАутентификация per-adapter:\n- **mailgun**: HMAC-SHA256 подпись в теле запроса (поле `signature.signature`); заголовки аутентификации отсутствуют.\n- **smsc**: IP-whitelist по CIDR (переменная `PROVIDER_SMSC_CALLBACK_ALLOWED_CIDRS`); заголовки аутентификации отсутствуют.\n\nТело запроса не имеет фиксированной схемы. Формат зависит от провайдера и нормализуется парсером адаптера.\nФормат payload смотрите в документации соответствующего провайдера.",
+                "operationId": "c6c0a9d207e406e728f5fc9bd9b7e37f",
+                "parameters": [
+                    {
+                        "name": "adapter",
+                        "in": "path",
+                        "description": "Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "smsc",
+                                "mailgun"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "X-Request-ID",
+                        "in": "header",
+                        "description": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Тело запроса в формате провайдера. Для mailgun — JSON Mailgun Webhooks API v3. Для smsc — form-data или query-string. Фиксированная схема отсутствует.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object"
+                            },
+                            "example": {
+                                "event-data": {
+                                    "event": "delivered",
+                                    "message": {
+                                        "headers": {
+                                            "message-id": "<id@mailgun.org>"
+                                        }
+                                    },
+                                    "timestamp": 1700000000
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Callback обработан: статус уведомления обновлён (с sent в delivered или с sent в dropped), либо событие провайдера не влияет на статус доставки (ignored)."
+                    },
+                    "200": {
+                        "description": "Уведомление уже в финальном статусе (delivered/dropped). Состояние не изменено.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Already finalized"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Недействительная подпись (mailgun).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid signature"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "IP-адрес не в whitelist (smsc).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Forbidden"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Неизвестный адаптер (отклоняется роутером) или уведомление с указанным provider_message_id и каналом не найдено.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Resource not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Уведомление ещё не отправлено (статус queued). Callback пришёл преждевременно.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Notification has not been sent yet"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Некорректный payload: парсер не смог разобрать тело запроса.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid callback payload"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/health/live": {
             "get": {
                 "tags": [
@@ -1210,6 +1368,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Callbacks",
+            "description": "Callbacks"
+        },
         {
             "name": "Health",
             "description": "Health"

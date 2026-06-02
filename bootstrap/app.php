@@ -3,6 +3,7 @@
 use App\Exceptions\AlreadyExistsException;
 use App\Exceptions\Callbacks\InvalidCallbackPayloadException;
 use App\Exceptions\Callbacks\InvalidCallbackSignatureException;
+use App\Exceptions\ConflictException;
 use App\Exceptions\IdempotencyConflictException;
 use App\Exceptions\NotFoundException;
 use App\Http\Middleware\ApiTokenAuth;
@@ -44,6 +45,9 @@ return Application::configure(basePath: dirname(__DIR__))
         });
         $exceptions->render(function (NotFoundException|ModelNotFoundException $e, Request $request) {
             return response()->json(['message' => 'Resource not found'], Response::HTTP_NOT_FOUND);
+        });
+        $exceptions->render(function (ConflictException $e, Request $request) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_CONFLICT);
         });
         $exceptions->render(function (AlreadyExistsException $e, Request $request) {
             return response()->json(['message' => $e->getMessage()], Response::HTTP_CONFLICT);

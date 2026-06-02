@@ -1,11 +1,561 @@
 {
   "item": [
     {
+      "name": "Callbacks",
+      "description": "Callbacks",
+      "item": [
+        {
+          "id": "902bbe8b-0b3f-4d27-aaa7-2bbfb9821c22",
+          "name": "Приём webhook-callback от провайдера рассылки",
+          "request": {
+            "name": "Приём webhook-callback от провайдера рассылки",
+            "description": {
+              "content": "Публичный webhook-endpoint для приёма callback от провайдеров рассылки.\nАутентификация per-adapter:\n- **mailgun**: HMAC-SHA256 подпись в теле запроса (поле `signature.signature`); заголовки аутентификации отсутствуют.\n- **smsc**: IP-whitelist по CIDR (переменная `PROVIDER_SMSC_CALLBACK_ALLOWED_CIDRS`); заголовки аутентификации отсутствуют.\n\nТело запроса не имеет фиксированной схемы. Формат зависит от провайдера и нормализуется парсером адаптера.\nФормат payload смотрите в документации соответствующего провайдера.",
+              "type": "text/plain"
+            },
+            "url": {
+              "path": [
+                "callbacks",
+                ":adapter"
+              ],
+              "host": [
+                "{{base_url}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "type": "any",
+                  "value": "mailgun",
+                  "key": "adapter",
+                  "disabled": false,
+                  "description": {
+                    "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                    "type": "text/plain"
+                  }
+                }
+              ],
+              "raw": "{{base_url}}/callbacks/:adapter"
+            },
+            "header": [
+              {
+                "disabled": false,
+                "description": {
+                  "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                  "type": "text/plain"
+                },
+                "key": "X-Request-ID",
+                "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "auth": null
+          },
+          "response": [
+            {
+              "id": "3b2ce734-e84d-4933-85d4-28e5d85030fe",
+              "name": "Уведомление уже в финальном статусе (delivered/dropped). Состояние не изменено.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "callbacks",
+                    ":adapter"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "mailgun",
+                      "key": "adapter"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Already finalized\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c2b8684c-f476-4186-8b5d-9726f799db96",
+              "name": "Callback обработан: статус уведомления обновлён (с sent в delivered или с sent в dropped), либо событие провайдера не влияет на статус доставки (ignored).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "callbacks",
+                    ":adapter"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "mailgun",
+                      "key": "adapter"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "No Content",
+              "code": 204,
+              "header": [],
+              "cookie": [],
+              "_postman_previewlanguage": "text"
+            },
+            {
+              "id": "38611e6d-d671-404c-81f9-7a9b6b6614d5",
+              "name": "Недействительная подпись (mailgun).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "callbacks",
+                    ":adapter"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "mailgun",
+                      "key": "adapter"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Invalid signature\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "74645f06-0d02-4e7e-8032-b562d9aeb22d",
+              "name": "IP-адрес не в whitelist (smsc).",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "callbacks",
+                    ":adapter"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "mailgun",
+                      "key": "adapter"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Forbidden\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "b07569a0-98fb-475f-9749-126f210b374b",
+              "name": "Неизвестный адаптер (отклоняется роутером) или уведомление с указанным provider_message_id и каналом не найдено.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "callbacks",
+                    ":adapter"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "mailgun",
+                      "key": "adapter"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Resource not found\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "c10e1d32-1128-42b5-8393-8c4e88443030",
+              "name": "Уведомление ещё не отправлено (статус queued). Callback пришёл преждевременно.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "callbacks",
+                    ":adapter"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "mailgun",
+                      "key": "adapter"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Notification has not been sent yet\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            },
+            {
+              "id": "9c15e951-d252-4039-9af0-dd73ee96a0a3",
+              "name": "Некорректный payload: парсер не смог разобрать тело запроса.",
+              "originalRequest": {
+                "url": {
+                  "path": [
+                    "callbacks",
+                    ":adapter"
+                  ],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "query": [],
+                  "variable": [
+                    {
+                      "disabled": false,
+                      "description": {
+                        "content": "(Required) Ключ адаптера провайдера из реестра. Неизвестное значение отклоняется роутером с 404. (This can only be one of smsc,mailgun)",
+                        "type": "text/plain"
+                      },
+                      "type": "any",
+                      "value": "mailgun",
+                      "key": "adapter"
+                    }
+                  ]
+                },
+                "header": [
+                  {
+                    "disabled": false,
+                    "description": {
+                      "content": "UUID для сквозной трассировки. Если передан — используется; иначе генерируется UUID v7. Всегда присутствует в ответе.",
+                      "type": "text/plain"
+                    },
+                    "key": "X-Request-ID",
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "method": "POST",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"event-data\": {\n    \"event\": \"delivered\",\n    \"message\": {\n      \"headers\": {\n        \"message-id\": \"<id@mailgun.org>\"\n      }\n    },\n    \"timestamp\": 1700000000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Invalid callback payload\"\n}",
+              "cookie": [],
+              "_postman_previewlanguage": "json"
+            }
+          ],
+          "event": [],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          }
+        }
+      ]
+    },
+    {
       "name": "Health",
       "description": "Health",
       "item": [
         {
-          "id": "e64d33b9-674b-4868-b55e-b626e3859abb",
+          "id": "d5bae291-9cee-4649-b224-ce6d9a9ab226",
           "name": "Проверка работоспособности сервиса",
           "request": {
             "name": "Проверка работоспособности сервиса",
@@ -38,7 +588,7 @@
           },
           "response": [
             {
-              "id": "8a579ebb-b637-401e-8fd2-90d2f9dbfdd3",
+              "id": "ae36eb76-8c10-4f2c-b327-1e5965fd0d62",
               "name": "Сервис работает",
               "originalRequest": {
                 "url": {
@@ -87,7 +637,7 @@
       "description": "Notifications",
       "item": [
         {
-          "id": "4db77fe8-d64e-4994-84d2-63ed018ab0fa",
+          "id": "ee621dd7-f1c1-436a-9258-619b941ef3b4",
           "name": "Массовая рассылка уведомлений",
           "request": {
             "name": "Массовая рассылка уведомлений",
@@ -117,7 +667,7 @@
                   "type": "text/plain"
                 },
                 "key": "Idempotency-Key",
-                "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
               },
               {
                 "disabled": false,
@@ -126,7 +676,7 @@
                   "type": "text/plain"
                 },
                 "key": "X-Request-ID",
-                "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
               },
               {
                 "key": "Content-Type",
@@ -160,7 +710,7 @@
           },
           "response": [
             {
-              "id": "65b0ec8d-adc2-4fdd-8777-4cca05b50630",
+              "id": "3f6d946b-3d65-4a7c-b42e-a699b970cd0f",
               "name": "Запрос принят к асинхронной обработке",
               "originalRequest": {
                 "url": {
@@ -184,7 +734,7 @@
                       "type": "text/plain"
                     },
                     "key": "Idempotency-Key",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "disabled": false,
@@ -193,7 +743,7 @@
                       "type": "text/plain"
                     },
                     "key": "X-Request-ID",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "key": "Content-Type",
@@ -232,12 +782,12 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n  \"bulk_request_id\": \"019600a2-7c3b-7000-9f3b-aaaaaaaaaaaa\",\n  \"accepted\": 5,\n  \"invalid_subscriber_ids\": [\n    \"8c5f25a9-0691-b4a6-414f-6f1168e81d59\",\n    \"82a0eabe-7b61-1f26-86fb-257abfc642fa\"\n  ]\n}",
+              "body": "{\n  \"bulk_request_id\": \"019600a2-7c3b-7000-9f3b-aaaaaaaaaaaa\",\n  \"accepted\": 5,\n  \"invalid_subscriber_ids\": [\n    \"e3502c5a-712f-eedc-57c7-659301f521d3\",\n    \"46027b81-c5b5-fd65-6e9a-ab371457a78c\"\n  ]\n}",
               "cookie": [],
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "3dcee2eb-1be1-41d1-b0c9-5d4ac1b87e3d",
+              "id": "667f861a-364c-4a1f-be33-89ea98825497",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -261,7 +811,7 @@
                       "type": "text/plain"
                     },
                     "key": "Idempotency-Key",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "disabled": false,
@@ -270,7 +820,7 @@
                       "type": "text/plain"
                     },
                     "key": "X-Request-ID",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "key": "Content-Type",
@@ -314,7 +864,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "a8ba22b9-6765-4a7e-bdd4-8e658e8c0717",
+              "id": "7876e71d-796e-412e-909b-e56b4fafc70c",
               "name": "Запрос с тем же Idempotency-Key ещё обрабатывается",
               "originalRequest": {
                 "url": {
@@ -338,7 +888,7 @@
                       "type": "text/plain"
                     },
                     "key": "Idempotency-Key",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "disabled": false,
@@ -347,7 +897,7 @@
                       "type": "text/plain"
                     },
                     "key": "X-Request-ID",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "key": "Content-Type",
@@ -391,7 +941,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "279e52ed-4b98-4541-8f4f-1453b8fbbd72",
+              "id": "7c2f18b4-33e5-49f7-ab04-a106b180de40",
               "name": "Ошибка валидации (в т.ч. отсутствует Idempotency-Key или превышен лимит subscriber_ids)",
               "originalRequest": {
                 "url": {
@@ -415,7 +965,7 @@
                       "type": "text/plain"
                     },
                     "key": "Idempotency-Key",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "disabled": false,
@@ -424,7 +974,7 @@
                       "type": "text/plain"
                     },
                     "key": "X-Request-ID",
-                    "value": "c584d78d-a61b-9814-6236-24b1fa332468"
+                    "value": "8f26678f-e393-71b6-ec2a-1d49535a6c9d"
                   },
                   {
                     "key": "Content-Type",
@@ -474,7 +1024,7 @@
           }
         },
         {
-          "id": "1c3e4fe5-7eb3-4658-a8f5-4ab7f024910e",
+          "id": "15bfa7c8-0974-46db-8898-f8ba9fe1c550",
           "name": "Получить уведомления подписчика",
           "request": {
             "name": "Получить уведомления подписчика",
@@ -574,7 +1124,7 @@
           },
           "response": [
             {
-              "id": "f2cf4a5c-c1d4-442f-bf2f-72bcc27f00d8",
+              "id": "99d98214-7482-48aa-902c-c64866330076",
               "name": "Список уведомлений",
               "originalRequest": {
                 "url": {
@@ -678,7 +1228,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "87ee0e10-2a9c-4aae-b7fa-ac3bd57b06bc",
+              "id": "ac2f763b-c99b-43f0-b855-e43160d14f5b",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -782,7 +1332,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "cc53f852-2862-4dc1-aaf7-efa063e4230d",
+              "id": "22ee56c6-eb22-46e5-a3d3-fac2e954fa7b",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -886,7 +1436,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "c9ee87b3-148c-4efd-961f-65ced926cce4",
+              "id": "83dfc071-b88f-4806-a983-81ca347174c1",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -996,7 +1546,7 @@
           }
         },
         {
-          "id": "670f9353-a95e-4c18-b102-16a66692abf8",
+          "id": "bdd5bd1e-d738-40e9-88c3-fbc87623787a",
           "name": "Получить уведомление по UUID",
           "request": {
             "name": "Получить уведомление по UUID",
@@ -1049,7 +1599,7 @@
           },
           "response": [
             {
-              "id": "6fd89f89-724f-4693-8618-37a95624d7bb",
+              "id": "97d09a11-7b43-4ab5-b23a-035e0565a69d",
               "name": "Данные уведомления",
               "originalRequest": {
                 "url": {
@@ -1106,7 +1656,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "81530c70-23b9-4dc5-bfed-efc9e62b3a69",
+              "id": "874835ca-99ed-4b32-9082-ed27e9eee7b1",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1163,7 +1713,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "b13b7b98-88a9-4e32-9ae7-655878659773",
+              "id": "5d535c76-f9bb-4f10-87fa-0e82ba3cdb52",
               "name": "Уведомление не найдено",
               "originalRequest": {
                 "url": {
@@ -1232,7 +1782,7 @@
       "description": "Subscribers",
       "item": [
         {
-          "id": "34091ef1-3cf8-4ed7-b884-27c4388e21f6",
+          "id": "3f61aa59-5240-4f98-a175-45eba80d504f",
           "name": "Получить подписчика по UUID",
           "request": {
             "name": "Получить подписчика по UUID",
@@ -1285,7 +1835,7 @@
           },
           "response": [
             {
-              "id": "86c38863-3016-49b3-b248-841db1fa5d32",
+              "id": "da38ec2b-4591-41cd-a20e-7341c115a492",
               "name": "Данные подписчика",
               "originalRequest": {
                 "url": {
@@ -1342,7 +1892,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "3dd90789-e006-4068-b5fc-35dc0188522d",
+              "id": "9c52193c-01fb-4359-91c3-a20507fb91d7",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1399,7 +1949,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "e2f7b582-1bd1-422c-9ddb-267b96557ed5",
+              "id": "5d11fdfb-6fca-4475-ad58-1ec517fae9ab",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -1462,7 +2012,7 @@
           }
         },
         {
-          "id": "cdaee00e-1889-4a82-9038-f6df8b2db046",
+          "id": "c6aa99c3-5b7b-43a8-8cfa-0ce4dbf2d185",
           "name": "Удалить подписчика",
           "request": {
             "name": "Удалить подписчика",
@@ -1515,7 +2065,7 @@
           },
           "response": [
             {
-              "id": "a8c13968-5188-4017-ae52-660676f8c48e",
+              "id": "6503b0df-93f6-43c3-b2ba-0a0c9b6dad2e",
               "name": "Подписчик удалён",
               "originalRequest": {
                 "url": {
@@ -1562,7 +2112,7 @@
               "_postman_previewlanguage": "text"
             },
             {
-              "id": "95649a23-db8a-418e-a1cb-8d3cfd7e7e1b",
+              "id": "e2af66b6-7982-429c-bef7-54ff3feb89d8",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1619,7 +2169,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "646e3c1a-c446-43a1-92f4-fe30f8760854",
+              "id": "2041be15-0931-487a-8bce-9e415ccdd2fd",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -1682,7 +2232,7 @@
           }
         },
         {
-          "id": "91914d16-c810-4c6d-92aa-54c487dbb375",
+          "id": "0b4feb18-8057-4a96-9703-794dd63a6d18",
           "name": "Частичное обновление подписчика",
           "request": {
             "name": "Частичное обновление подписчика",
@@ -1748,7 +2298,7 @@
           },
           "response": [
             {
-              "id": "c3e2e578-926f-43eb-a3ac-85b5fa897bab",
+              "id": "cc0e46f4-1528-4978-83aa-030618ceb770",
               "name": "Подписчик обновлён",
               "originalRequest": {
                 "url": {
@@ -1818,7 +2368,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "a4d28d8e-3849-4035-b006-5bd1b59e73a0",
+              "id": "380be8a6-bfac-42d0-9d10-a7c49f567a75",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -1888,7 +2438,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "a859a9df-499d-48e1-a7bb-8b4be19bcfbc",
+              "id": "93a5bd49-a5d7-4450-ad3e-a670a3cd6fbd",
               "name": "Подписчик не найден",
               "originalRequest": {
                 "url": {
@@ -1958,7 +2508,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "868b897b-eb9d-4bfa-888f-98991b4a0244",
+              "id": "68e14c93-026f-4096-8639-61ca780df840",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -2034,7 +2584,7 @@
           }
         },
         {
-          "id": "1a82da7c-7fef-476e-b6c3-cc5f332c08bb",
+          "id": "05b0913b-1b8c-402e-81ca-3d4fcdd7b7f2",
           "name": "Получить список подписчиков",
           "request": {
             "name": "Получить список подписчиков",
@@ -2103,7 +2653,7 @@
           },
           "response": [
             {
-              "id": "b982d9ca-4713-4dd0-8c7d-13a9363d5aa2",
+              "id": "2f4f803a-466a-4c16-bfaf-f55ad5a916d8",
               "name": "Список подписчиков",
               "originalRequest": {
                 "url": {
@@ -2176,7 +2726,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "5788d4bb-4cd7-4590-ba06-5719b76cdcad",
+              "id": "9fc03cf7-1e86-4e3a-ac9b-7db1cd2de675",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -2255,7 +2805,7 @@
           }
         },
         {
-          "id": "9614c627-3c68-41d2-8c36-52e32237112d",
+          "id": "c1164cbd-0afb-4d14-ad24-fc2661b524be",
           "name": "Создать подписчика",
           "request": {
             "name": "Создать подписчика",
@@ -2309,7 +2859,7 @@
           },
           "response": [
             {
-              "id": "19ebf572-9c30-44a5-9d77-e3b5dd14e171",
+              "id": "52b694ce-afbe-409d-879a-19acd1dc76b3",
               "name": "Подписчик создан",
               "originalRequest": {
                 "url": {
@@ -2367,7 +2917,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "4389835c-74bb-4bce-b0b5-a2741ae89767",
+              "id": "3cb16765-b574-4fa4-b231-d6113a754624",
               "name": "Не авторизован",
               "originalRequest": {
                 "url": {
@@ -2425,7 +2975,7 @@
               "_postman_previewlanguage": "json"
             },
             {
-              "id": "c075e281-1d39-4c4d-a717-8a6f343d690e",
+              "id": "45158ad0-34b6-4501-9f16-17f632c28f0d",
               "name": "Ошибка валидации",
               "originalRequest": {
                 "url": {
@@ -2507,7 +3057,7 @@
     }
   ],
   "info": {
-    "_postman_id": "d90d785a-d7c9-4d72-9d3a-864329f4ee5e",
+    "_postman_id": "38e29d73-5b6a-4c87-9d77-5677f533a787",
     "name": "Notification Service API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {

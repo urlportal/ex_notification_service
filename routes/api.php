@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Callbacks\ProviderCallbackController;
 use App\Http\Controllers\Health\HealthLivenessController;
 use App\Http\Controllers\Notifications\BulkSendNotificationController;
 use App\Http\Controllers\Notifications\IndexSubscriberNotificationsController;
@@ -9,9 +10,14 @@ use App\Http\Controllers\Subscribers\IndexSubscribersController;
 use App\Http\Controllers\Subscribers\ShowSubscriberController;
 use App\Http\Controllers\Subscribers\StoreSubscriberController;
 use App\Http\Controllers\Subscribers\UpdateSubscriberController;
+use App\Services\Callbacks\CallbackAdapterRegistry;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health/live', HealthLivenessController::class);
+
+Route::post('/callbacks/{adapter}', ProviderCallbackController::class)
+    ->middleware('callback.signature')
+    ->whereIn('adapter', app(CallbackAdapterRegistry::class)->keys());
 
 Route::prefix('v1')->group(function () {
     Route::middleware('api.token')->group(function () {

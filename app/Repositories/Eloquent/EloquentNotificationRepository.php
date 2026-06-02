@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\NotificationChannel;
 use App\Enums\NotificationStatus;
 use App\Exceptions\NotFoundException;
 use App\Models\Notification;
@@ -42,9 +43,30 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
         return Notification::where('idempotency_key', $key)->first();
     }
 
-    public function findByProviderMessageId(string $id): ?Notification
+    public function findByProviderMessageId(string $providerMessageId, NotificationChannel $channel): ?Notification
     {
-        return Notification::where('provider_message_id', $id)->first();
+        return Notification::where('provider_message_id', $providerMessageId)
+            ->where('channel', $channel)
+            ->first();
+    }
+
+    public function markDelivered(string $id, \DateTimeImmutable $deliveredAt): void
+    {
+        Notification::query()->whereKey($id)->update([
+            'status' => NotificationStatus::Delivered->value,
+            'delivered_at' => $deliveredAt,
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function markDroppedFromCallback(string $id, \DateTimeImmutable $droppedAt, string $error): void
+    {
+        Notification::query()->whereKey($id)->update([
+            'status' => NotificationStatus::Dropped->value,
+            'dropped_at' => $droppedAt,
+            'last_error' => $error,
+            'updated_at' => now(),
+        ]);
     }
 
     /**
