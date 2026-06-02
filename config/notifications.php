@@ -1,5 +1,10 @@
 <?php
 
+use App\Services\Callbacks\Auth\IpWhitelistAuthenticator;
+use App\Services\Callbacks\Auth\MailgunSignatureAuthenticator;
+use App\Services\Callbacks\Parsing\MailgunCallbackParser;
+use App\Services\Callbacks\Parsing\SmscCallbackParser;
+
 return [
     'bulk' => [
         // Максимум subscriber_ids в одном запросе POST /api/v1/notifications/bulk.
@@ -53,4 +58,26 @@ return [
             3 => ['key' => '30m', 'ttl_ms' => (int) env('RETRY_30M_TTL_MS', 1800000)],
         ],
     ],
+
+    // Реестр адаптеров входящих webhook от провайдеров сообщений.
+    // Ключ массива - имя адаптера (используется как path-параметр {adapter} в URL).
+    // channel - канал доставки (sms/email), authenticator - класс проверки подлинности,
+    // parser - класс разбора payload. Конфиг адаптера передаётся в verify() аргументом.
+    // Добавить нового провайдера: добавить в массив ниже, создать authenticator и parser.
+    'callbacks' => [
+        'smsc' => [
+            'channel' => 'sms',
+            'authenticator' => IpWhitelistAuthenticator::class,
+            'parser' => SmscCallbackParser::class,
+            'allowed_cidrs' => env('PROVIDER_SMSC_CALLBACK_ALLOWED_CIDRS'),
+        ],
+        'mailgun' => [
+            'channel' => 'email',
+            'authenticator' => MailgunSignatureAuthenticator::class,
+            'parser' => MailgunCallbackParser::class,
+            'signing_key' => env('PROVIDER_MAILGUN_WEBHOOK_SIGNING_KEY'),
+            'replay_window_seconds' => (int) env('PROVIDER_MAILGUN_CALLBACK_REPLAY_WINDOW', 300),
+        ],
+    ],
+
 ];
