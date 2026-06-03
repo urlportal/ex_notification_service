@@ -4,6 +4,7 @@ namespace Tests\Feature\Messaging\Retry;
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use PhpAmqpLib\Message\AMQPMessage;
 use Tests\Feature\Messaging\Sender\SenderTestCase;
 
 /**
@@ -115,6 +116,43 @@ abstract class RetryTestCase extends SenderTestCase
         );
 
         return (array) $rows[0];
+    }
+
+    /**
+     * Публикует pending retry-копии из msg_outbox в брокер, затем
+     * немедленно переносит сообщение из retry-очереди в основную, минуя
+     * ожидание TTL. Используется для тестов с уровнями 5m и 30m, где
+     * реальная задержка TTL недопустима.
+     */
+    protected function drainRetryQueueAndConsume(
+        string $retryQueueName,
+        string $mainQueueName,
+        int $expectedMessages,
+    ): void {
+        $this->runOutboxRelayOnce();
+
+        $channel = $this->amqpFactory->connection()->channel();
+        try {
+            $message = $channel->basic_get($retryQueueName, no_ack: true);
+            if ($message === null) {
+                $this->fail(sprintf('в retry-очереди %s нет сообщения', $retryQueueName));
+            }
+            $channel->basic_publish(
+                new AMQPMessage($message->getBody(), $message->get_properties()),
+                '',
+                $mainQueueName,
+            );
+        } finally {
+            $channel->close();
+        }
+
+        $profile = match ($mainQueueName) {
+            self::QUEUE_TRANSACTIONAL => 'transactional',
+            self::QUEUE_MARKETING => 'marketing',
+            default => $this->fail(sprintf('неизвестная очередь %s', $mainQueueName)),
+        };
+
+        $this->consume($profile, $expectedMessages);
     }
 
     /**

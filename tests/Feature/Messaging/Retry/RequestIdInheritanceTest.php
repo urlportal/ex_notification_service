@@ -46,9 +46,9 @@ class RequestIdInheritanceTest extends RetryTestCase
         );
 
         $this->consume('transactional', 1);
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.transactional', self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.5m.transactional', self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30m.transactional', self::QUEUE_TRANSACTIONAL, 1);
 
         $copies = DB::table('msg_outbox')
             ->where('exchange', self::RETRY_EXCHANGE)

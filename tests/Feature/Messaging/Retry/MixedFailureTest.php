@@ -40,7 +40,7 @@ class MixedFailureTest extends RetryTestCase
         $this->assertMsgOutboxRetryCopy((string) $notification->id, '30s.transactional');
 
         // Попытка 2: permanent -> dropped, новой retry-копии нет.
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.transactional', self::QUEUE_TRANSACTIONAL, 1);
         $afterSecond = Notification::query()->findOrFail($notification->id);
         $this->assertSame(NotificationStatus::Dropped, $afterSecond->status);
         $this->assertNotNull($afterSecond->dropped_at);

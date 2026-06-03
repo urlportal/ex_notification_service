@@ -84,7 +84,7 @@
       "auto_delete": false,
       "arguments": {
         "x-queue-type": "classic",
-        "x-message-ttl": 30000,
+        "x-message-ttl": 5000,
         "x-dead-letter-exchange": "notifications.exchange",
         "x-dead-letter-routing-key": "transactional"
       }
@@ -96,7 +96,7 @@
       "auto_delete": false,
       "arguments": {
         "x-queue-type": "classic",
-        "x-message-ttl": 30000,
+        "x-message-ttl": 5000,
         "x-dead-letter-exchange": "notifications.exchange",
         "x-dead-letter-routing-key": "marketing"
       }

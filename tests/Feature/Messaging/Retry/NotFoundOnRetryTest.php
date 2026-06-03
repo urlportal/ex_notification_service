@@ -28,7 +28,7 @@ class NotFoundOnRetryTest extends RetryTestCase
 
         Notification::query()->whereKey($notificationId)->delete();
 
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.transactional', self::QUEUE_TRANSACTIONAL, 1);
 
         // Уведомление по-прежнему отсутствует, новой retry-копии нет, DLQ пуст.
         $this->assertNull(Notification::query()->find($notificationId));

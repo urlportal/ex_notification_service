@@ -37,7 +37,7 @@ class RoutingKeyPreservationTest extends RetryTestCase
         $this->consume('transactional', 1);
         $this->assertMsgOutboxRetryCopy((string) $notification->id, '30s.transactional');
 
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.transactional', self::QUEUE_TRANSACTIONAL, 1);
 
         // В msg_inbox две записи (исходная и retry-копия). Обе под consumer_name = sender-transactional.
         $this->assertSame(
@@ -79,7 +79,7 @@ class RoutingKeyPreservationTest extends RetryTestCase
         $this->consume('marketing', 1);
         $this->assertMsgOutboxRetryCopy((string) $notification->id, '30s.marketing');
 
-        $this->waitForRetryReturnAndConsume(self::QUEUE_MARKETING, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.marketing', self::QUEUE_MARKETING, 1);
 
         $this->assertSame(
             2,

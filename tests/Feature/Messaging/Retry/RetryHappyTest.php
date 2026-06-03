@@ -50,15 +50,15 @@ class RetryHappyTest extends RetryTestCase
         $this->assertMsgOutboxRetryCopy((string) $notification->id, '30s.transactional');
 
         // Попытка 2: retry возвращается -> второй temporary -> retry на 5m.
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.transactional', self::QUEUE_TRANSACTIONAL, 1);
         $this->assertMsgOutboxRetryCopy((string) $notification->id, '5m.transactional');
 
         // Попытка 3: третий temporary -> retry на 30m.
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.5m.transactional', self::QUEUE_TRANSACTIONAL, 1);
         $this->assertMsgOutboxRetryCopy((string) $notification->id, '30m.transactional');
 
         // Попытка 4: успех.
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30m.transactional', self::QUEUE_TRANSACTIONAL, 1);
 
         $fresh = Notification::query()->findOrFail($notification->id);
         $this->assertSame(NotificationStatus::Sent, $fresh->status);

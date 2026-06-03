@@ -26,9 +26,9 @@ class RetryExhaustionTest extends RetryTestCase
 
         // Исходная + 3 retry, всего 4 попытки.
         $this->consume('transactional', 1);
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.transactional', self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.5m.transactional', self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30m.transactional', self::QUEUE_TRANSACTIONAL, 1);
 
         $fresh = Notification::query()->findOrFail($notification->id);
         $this->assertSame(NotificationStatus::Dropped, $fresh->status);

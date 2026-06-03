@@ -38,7 +38,7 @@ class AlreadyFinalizedOnRetryTest extends RetryTestCase
         );
 
         // Возврат retry-копии: обработчик увидит status=sent и отдаст ack.
-        $this->waitForRetryReturnAndConsume(self::QUEUE_TRANSACTIONAL, 1);
+        $this->drainRetryQueueAndConsume('notifications.retry.30s.transactional', self::QUEUE_TRANSACTIONAL, 1);
 
         $fresh = Notification::query()->findOrFail($notification->id);
         $this->assertSame(NotificationStatus::Sent, $fresh->status);

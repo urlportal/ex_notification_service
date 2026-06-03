@@ -381,9 +381,10 @@ class BulkExpandConsumerTest extends TestCase
         }
 
         if ($pid === 0) {
-            // Дочерний процесс: запускаем бесконечный consumer
-            $exitCode = Artisan::call('notifications:consume-bulk-expand');
-            exit($exitCode);
+            // Дочерний процесс: запускаем consumer через exec, чтобы унаследованные
+            // PHP-объекты (AMQP-соединения, БД и т.д.) не блокировали shutdown.
+            pcntl_exec(PHP_BINARY, [base_path('artisan'), 'notifications:consume-bulk-expand']);
+            exit(1);
         }
 
         // Родительский процесс: ждём обработки события, затем шлём SIGTERM.
