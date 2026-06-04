@@ -60,7 +60,7 @@ class TraceTest extends SenderTestCase
             'X-Request-Id' => $requestId,
         ])->postJson('/api/v1/notifications/bulk', [
             'channel' => NotificationChannel::Email->value,
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             'message' => 'trace test',
             'subscriber_ids' => $subscriberIds,
         ]);

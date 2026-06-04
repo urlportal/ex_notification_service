@@ -36,7 +36,7 @@ class RetryHappyTest extends RetryTestCase
             },
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $requestId = 'req-happy-R';
 
         $this->publishSend(

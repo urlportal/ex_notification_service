@@ -8,7 +8,7 @@ use App\Exceptions\Messaging\UnknownPriorityException;
 /**
  * Профиль доставки: иммутабельный набор настроек (очередь, воркеры, prefetch)
  * Строится при boot из config('notifications.delivery_profiles').
- * Источник истины для валидации priority (HTTP-приём, bulk-expand-handler) и
+ * Источник истины для валидации delivery_profile (HTTP-приём, bulk-expand-handler) и
  * резолва имени AMQP-очереди в sender-воркере.
  */
 final class DeliveryProfile

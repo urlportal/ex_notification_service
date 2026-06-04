@@ -28,7 +28,7 @@ class RetryLogTest extends RetryTestCase
             static fn (Notification $n) => throw new TemporaryGatewayException('boom'),
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $requestId = 'req-retrylog';
         $this->publishSend(
             (string) $notification->id,
@@ -48,7 +48,7 @@ class RetryLogTest extends RetryTestCase
         $this->assertSame(Level::Warning, $record->level);
         $this->assertSame((string) $notification->id, $record->context['notification_id']);
         $this->assertSame('email', $record->context['channel']);
-        $this->assertSame('transactional', $record->context['priority']);
+        $this->assertSame('transactional', $record->context['delivery_profile']);
         $this->assertSame(1, $record->context['attempts']);
         $this->assertSame('30s', $record->context['next_level']);
         $this->assertSame('boom', $record->context['last_error']);

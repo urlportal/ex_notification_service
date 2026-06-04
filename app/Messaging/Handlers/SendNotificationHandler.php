@@ -91,7 +91,7 @@ class SendNotificationHandler extends AbstractIdempotentMessageHandler
             $this->logger->info('notification sent', [
                 'notification_id' => (string) $notification->id,
                 'channel' => $notification->channel->value,
-                'priority' => $notification->priority,
+                'delivery_profile' => $notification->delivery_profile,
                 'provider_message_id' => $response->providerMessageId,
                 'attempts' => $retryAttempt + 1,
             ]);
@@ -126,7 +126,7 @@ class SendNotificationHandler extends AbstractIdempotentMessageHandler
                 $this->outboxRepo->enqueue(new MsgOutboxEntry(
                     id: Uuid::uuid7()->toString(),
                     exchange: (string) config('rabbitmq.retry.exchange'),
-                    routingKey: $nextLevel.'.'.$notification->priority,
+                    routingKey: $nextLevel.'.'.$notification->delivery_profile,
                     payload: ['notification_id' => (string) $notification->id],
                     headers: [
                         'request_id' => (string) ($headers['request_id'] ?? ''),
@@ -137,7 +137,7 @@ class SendNotificationHandler extends AbstractIdempotentMessageHandler
                 $this->logger->warning('notification retry scheduled', [
                     'notification_id' => (string) $notification->id,
                     'channel' => $notification->channel->value,
-                    'priority' => $notification->priority,
+                    'delivery_profile' => $notification->delivery_profile,
                     'attempts' => $attempts,
                     'next_level' => $nextLevel,
                     'last_error' => $e->getMessage(),

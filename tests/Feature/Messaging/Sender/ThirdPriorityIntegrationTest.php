@@ -92,7 +92,7 @@ class ThirdPriorityIntegrationTest extends SenderTestCase
         $this->bindSuccessGateway();
 
         $notification = $this->createQueuedNotification([
-            'priority' => self::INTERNAL_PRIORITY,
+            'delivery_profile' => self::INTERNAL_PRIORITY,
         ]);
         $this->publishSend((string) $notification->id, self::INTERNAL_QUEUE);
 
@@ -108,7 +108,7 @@ class ThirdPriorityIntegrationTest extends SenderTestCase
         );
     }
 
-    // HTTP-уровень. POST /bulk c priority=internal проходит валидацию
+    // HTTP-уровень. POST /bulk c delivery_profile=internal проходит валидацию
     // (catalog->names() содержит новое имя), проходит цепочка
     // relay -> bulk-expand -> relay -> sender, все уведомления sent.
     public function test_http_bulk_endpoint_accepts_and_processes_new_priority(): void
@@ -127,7 +127,7 @@ class ThirdPriorityIntegrationTest extends SenderTestCase
             'X-Request-Id' => Uuid::uuid7()->toString(),
         ])->postJson('/api/v1/notifications/bulk', [
             'channel' => NotificationChannel::Email->value,
-            'priority' => self::INTERNAL_PRIORITY,
+            'delivery_profile' => self::INTERNAL_PRIORITY,
             'message' => 'third-priority',
             'subscriber_ids' => $subscriberIds,
         ]);
@@ -147,12 +147,12 @@ class ThirdPriorityIntegrationTest extends SenderTestCase
                 ->count(),
         );
 
-        // Каждое уведомление имеет priority=internal в БД (string-поле).
-        $priorities = DB::table('notifications')
+        // Каждое уведомление имеет delivery_profile=internal в БД (string-поле).
+        $profiles = DB::table('notifications')
             ->where('bulk_request_id', $bulkRequestId)
-            ->pluck('priority')
+            ->pluck('delivery_profile')
             ->all();
-        foreach ($priorities as $p) {
+        foreach ($profiles as $p) {
             $this->assertSame(self::INTERNAL_PRIORITY, $p);
         }
     }

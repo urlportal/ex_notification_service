@@ -244,7 +244,7 @@
                             },
                             "example": {
                                 "channel": "email",
-                                "priority": "transactional",
+                                "delivery_profile": "transactional",
                                 "message": "Ваш заказ подтверждён",
                                 "subscriber_ids": [
                                     "019600a2-7c3b-7000-9f3b-000000000001",
@@ -315,7 +315,7 @@
                     "Notifications"
                 ],
                 "summary": "Получить уведомления подписчика",
-                "description": "Возвращает постраничный список уведомлений подписчика с опциональной фильтрацией по статусу, каналу и приоритету.",
+                "description": "Возвращает постраничный список уведомлений подписчика с опциональной фильтрацией по статусу, каналу и профилю доставки.",
                 "operationId": "cedf964968050efb62e6e3a71a595c1a",
                 "parameters": [
                     {
@@ -360,9 +360,9 @@
                         }
                     },
                     {
-                        "name": "priority",
+                        "name": "delivery_profile",
                         "in": "query",
-                        "description": "Фильтр по приоритету (одно значение)",
+                        "description": "Фильтр по профилю доставки (одно значение)",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1153,7 +1153,7 @@
                     "id",
                     "subscriber_id",
                     "channel",
-                    "priority",
+                    "delivery_profile",
                     "status",
                     "message",
                     "attempts",
@@ -1185,7 +1185,7 @@
                             "email"
                         ]
                     },
-                    "priority": {
+                    "delivery_profile": {
                         "type": "string",
                         "example": "transactional",
                         "enum": [
@@ -1290,7 +1290,7 @@
             "BulkSendNotificationRequest": {
                 "required": [
                     "channel",
-                    "priority",
+                    "delivery_profile",
                     "message",
                     "subscriber_ids"
                 ],
@@ -1303,7 +1303,7 @@
                             "email"
                         ]
                     },
-                    "priority": {
+                    "delivery_profile": {
                         "type": "string",
                         "example": "transactional",
                         "enum": [

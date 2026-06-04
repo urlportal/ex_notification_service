@@ -43,7 +43,7 @@ abstract class CallbackTestCase extends TestCase
             'id' => Uuid::uuid7()->toString(),
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Email,
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             'status' => NotificationStatus::Sent,
             'message' => 'test message',
             'idempotency_key' => Uuid::uuid7()->toString(),

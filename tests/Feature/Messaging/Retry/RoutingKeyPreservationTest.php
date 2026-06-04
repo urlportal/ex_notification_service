@@ -31,7 +31,7 @@ class RoutingKeyPreservationTest extends RetryTestCase
             },
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
 
         $this->consume('transactional', 1);
@@ -73,7 +73,7 @@ class RoutingKeyPreservationTest extends RetryTestCase
             },
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'marketing']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'marketing']);
         $this->publishSend((string) $notification->id, self::QUEUE_MARKETING);
 
         $this->consume('marketing', 1);

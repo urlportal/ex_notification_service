@@ -67,7 +67,7 @@ class PrioritiesCheckBrokerCommand extends Command
         }
 
         $this->amqpFactory->close();
-        $this->table(['priority', 'queue', 'status'], $rows);
+        $this->table(['delivery_profile', 'queue', 'status'], $rows);
 
         return $hasError ? self::FAILURE : self::SUCCESS;
     }

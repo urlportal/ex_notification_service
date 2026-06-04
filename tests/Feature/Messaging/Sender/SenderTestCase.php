@@ -35,7 +35,7 @@ abstract class SenderTestCase extends TestCase
 
     protected const string RETRY_EXCHANGE = 'notifications.retry.exchange';
 
-    // Шесть retry-очередей вида notifications.retry.<level>.<priority>.
+    // Шесть retry-очередей вида notifications.retry.<level>.<delivery_profile>.
     // Их нужно очищать в setUp/tearDown, чтобы остатки от предыдущего теста
     // не вернулись в основную очередь через DL routing-key и не нарушили изоляцию.
     protected const array RETRY_QUEUES = [
@@ -190,7 +190,7 @@ abstract class SenderTestCase extends TestCase
             'id' => Uuid::uuid7()->toString(),
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Email,
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             'status' => NotificationStatus::Queued,
             'message' => 'test message',
             'idempotency_key' => Uuid::uuid7()->toString(),

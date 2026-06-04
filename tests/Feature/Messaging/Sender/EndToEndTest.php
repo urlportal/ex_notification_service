@@ -45,7 +45,7 @@ class EndToEndTest extends SenderTestCase
             'X-Request-Id' => Uuid::uuid7()->toString(),
         ])->postJson('/api/v1/notifications/bulk', [
             'channel' => NotificationChannel::Email->value,
-            'priority' => 'marketing',
+            'delivery_profile' => 'marketing',
             'message' => 'end-to-end',
             'subscriber_ids' => $subscriberIds,
         ]);

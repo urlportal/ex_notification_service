@@ -22,7 +22,7 @@ class AlreadyFinalizedOnRetryTest extends RetryTestCase
             static fn (Notification $n) => throw new TemporaryGatewayException('temp'),
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
 
         $this->consume('transactional', 1);

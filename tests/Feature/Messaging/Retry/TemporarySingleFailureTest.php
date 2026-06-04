@@ -22,7 +22,7 @@ class TemporarySingleFailureTest extends RetryTestCase
         );
 
         $notification = $this->createQueuedNotification([
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
         ]);
 
         $requestId = 'req-single-temp';

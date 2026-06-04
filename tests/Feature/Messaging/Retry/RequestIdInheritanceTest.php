@@ -37,7 +37,7 @@ class RequestIdInheritanceTest extends RetryTestCase
             },
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $requestId = 'trace-R';
         $this->publishSend(
             (string) $notification->id,

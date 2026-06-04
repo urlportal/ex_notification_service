@@ -11,7 +11,7 @@ readonly class BulkExpandMessage
     public function __construct(
         public string $bulkRequestId,
         public NotificationChannel $channel,
-        public string $priority,
+        public string $deliveryProfile,
         public string $message,
         public array $subscriberIds,
         public string $idempotencyKey,
@@ -24,7 +24,7 @@ readonly class BulkExpandMessage
             throw new InvalidBulkExpandPayloadException('payload is not a JSON object');
         }
 
-        foreach (['bulk_request_id', 'channel', 'priority', 'message', 'subscriber_ids', 'idempotency_key'] as $key) {
+        foreach (['bulk_request_id', 'channel', 'delivery_profile', 'message', 'subscriber_ids', 'idempotency_key'] as $key) {
             if (! array_key_exists($key, $payload)) {
                 throw new InvalidBulkExpandPayloadException("missing required key: {$key}");
             }
@@ -41,9 +41,9 @@ readonly class BulkExpandMessage
         $channel = NotificationChannel::tryFrom($payload['channel'])
             ?? throw new InvalidBulkExpandPayloadException("unknown channel: {$payload['channel']}");
 
-        // Тип priority проверяется здесь; валидация имени по каталогу - в handler.
-        if (! is_string($payload['priority']) || $payload['priority'] === '') {
-            throw new InvalidBulkExpandPayloadException('priority must be a non-empty string');
+        // Тип delivery_profile проверяется здесь; валидация имени по каталогу - в handler.
+        if (! is_string($payload['delivery_profile']) || $payload['delivery_profile'] === '') {
+            throw new InvalidBulkExpandPayloadException('delivery_profile must be a non-empty string');
         }
 
         if (! is_string($payload['message']) || $payload['message'] === '') {
@@ -67,7 +67,7 @@ readonly class BulkExpandMessage
         return new self(
             bulkRequestId: $payload['bulk_request_id'],
             channel: $channel,
-            priority: $payload['priority'],
+            deliveryProfile: $payload['delivery_profile'],
             message: $payload['message'],
             subscriberIds: array_values($payload['subscriber_ids']),
             idempotencyKey: $payload['idempotency_key'],

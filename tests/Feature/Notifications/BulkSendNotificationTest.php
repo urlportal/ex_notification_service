@@ -127,7 +127,7 @@ class BulkSendNotificationTest extends TestCase
     {
         $defaults = [
             'channel' => NotificationChannel::Email->value,
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             'message' => 'Hello, subscriber!',
         ];
 
@@ -162,7 +162,7 @@ class BulkSendNotificationTest extends TestCase
 
         $this->assertSame($response->json('bulk_request_id'), $row->payload['bulk_request_id']);
         $this->assertSame(NotificationChannel::Email->value, $row->payload['channel']);
-        $this->assertSame('transactional', $row->payload['priority']);
+        $this->assertSame('transactional', $row->payload['delivery_profile']);
         $this->assertSame('Hello, subscriber!', $row->payload['message']);
         $this->assertSame($subscriberIds, $row->payload['subscriber_ids']);
         $this->assertArrayHasKey('idempotency_key', $row->payload);
@@ -291,7 +291,7 @@ class BulkSendNotificationTest extends TestCase
         $response = $this->withHeaders($this->auth())
             ->postJson('/api/v1/notifications/bulk', [
                 'channel' => NotificationChannel::Email->value,
-                'priority' => 'transactional',
+                'delivery_profile' => 'transactional',
                 'message' => 'Hello!',
                 'subscriber_ids' => $subscriberIds,
             ]);
@@ -389,18 +389,18 @@ class BulkSendNotificationTest extends TestCase
             ->assertJsonPath('accepted', 5);
     }
 
-    // Значение priority вне DeliveryProfile отклоняется с 422.
-    public function test_unknown_priority_returns_422(): void
+    // Значение delivery_profile вне DeliveryProfile отклоняется с 422.
+    public function test_unknown_delivery_profile_returns_422(): void
     {
         $existing = $this->makeSubscriberIds(1);
 
         $response = $this->postBulk([
-            'priority' => 'no_such_priority',
+            'delivery_profile' => 'no_such_profile',
             'subscriber_ids' => $existing,
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonStructure(['errors' => ['priority']]);
+            ->assertJsonStructure(['errors' => ['delivery_profile']]);
 
         $this->assertDatabaseCount('msg_outbox', 0);
     }

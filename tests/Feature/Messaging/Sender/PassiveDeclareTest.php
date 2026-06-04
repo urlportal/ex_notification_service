@@ -55,7 +55,7 @@ class PassiveDeclareTest extends SenderTestCase
         $this->bindSuccessGateway();
 
         $notification = $this->createQueuedNotification([
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
         ]);
         $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
 
@@ -95,7 +95,7 @@ class PassiveDeclareTest extends SenderTestCase
 
     // --queue=unknown_priority (exit 2 - INVALID), AMQP не открывается
     // (нет логов про probe queue или AMQP-соединение).
-    public function test_unknown_priority_exits_with_invalid_without_opening_amqp(): void
+    public function test_unknown_delivery_profile_exits_with_invalid_without_opening_amqp(): void
     {
         $exitCode = Artisan::call('notifications:send', [
             '--queue' => 'no_such_priority',

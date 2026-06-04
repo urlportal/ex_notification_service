@@ -21,7 +21,7 @@ use OpenApi\Attributes as OA;
             schema: new OA\Schema(ref: '#/components/schemas/BulkSendNotificationRequest'),
             example: [
                 'channel' => 'email',
-                'priority' => 'transactional',
+                'delivery_profile' => 'transactional',
                 'message' => 'Ваш заказ подтверждён',
                 'subscriber_ids' => [
                     '019600a2-7c3b-7000-9f3b-000000000001',

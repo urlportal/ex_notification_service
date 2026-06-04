@@ -20,7 +20,7 @@ class RetryExhaustionTest extends RetryTestCase
             static fn (Notification $n) => throw new TemporaryGatewayException('persistent failure'),
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
 
         $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
 

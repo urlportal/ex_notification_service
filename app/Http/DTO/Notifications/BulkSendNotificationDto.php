@@ -11,7 +11,7 @@ readonly class BulkSendNotificationDto
      */
     public function __construct(
         public NotificationChannel $channel,
-        public string $priority,
+        public string $deliveryProfile,
         public string $message,
         public array $subscriberIds,
         public string $idempotencyKey,

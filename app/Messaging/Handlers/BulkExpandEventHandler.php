@@ -43,9 +43,9 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
         // fromArray бросит исключение, при невалидном JSON
         $event = BulkExpandMessage::fromArray(json_decode($message->getBody(), true));
 
-        // Имя профиля доставки проверяем здесь, а не в DTO. Сообщение с неизвестным priority уходит в DLQ.
-        if (! $this->deliveryProfile->has($event->priority)) {
-            throw new InvalidBulkExpandPayloadException("unknown profile: {$event->priority}");
+        // Имя профиля доставки проверяем здесь, а не в DTO. Сообщение с неизвестным профилем уходит в DLQ.
+        if (! $this->deliveryProfile->has($event->deliveryProfile)) {
+            throw new InvalidBulkExpandPayloadException("unknown profile: {$event->deliveryProfile}");
         }
 
         // Пропускаем только существующих подписчиков
@@ -69,7 +69,7 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
                 'subscriber_id' => $sid,
                 'bulk_request_id' => $event->bulkRequestId,
                 'channel' => $event->channel->value,
-                'priority' => $event->priority,
+                'delivery_profile' => $event->deliveryProfile,
                 'status' => NotificationStatus::Queued->value,
                 'message' => $event->message,
                 'idempotency_key' => $event->idempotencyKey,
@@ -86,7 +86,7 @@ class BulkExpandEventHandler extends AbstractIdempotentMessageHandler
                 $entries[] = new MsgOutboxEntry(
                     id: Uuid::uuid7()->toString(),
                     exchange: $sendExchange,
-                    routingKey: $event->priority,
+                    routingKey: $event->deliveryProfile,
                     payload: ['notification_id' => $idBySubscriber[$sid]],
                     headers: ['request_id' => $requestId, 'retry_attempt' => 0],
                 );

@@ -18,7 +18,7 @@ class HappyPathTest extends SenderTestCase
 
         $notification = $this->createQueuedNotification([
             'channel' => NotificationChannel::Email,
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             // last_error не пустой - проверим, что updateOnSent его сбросит
             'last_error' => 'previous attempt error',
         ]);

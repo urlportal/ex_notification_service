@@ -19,7 +19,7 @@ class NotFoundOnRetryTest extends RetryTestCase
             static fn (Notification $n) => throw new TemporaryGatewayException('temp'),
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $notificationId = (string) $notification->id;
         $this->publishSend($notificationId, self::QUEUE_TRANSACTIONAL);
 

@@ -118,14 +118,14 @@ class BulkExpandEventHandlerTest extends TestCase
      */
     private function makeMessage(
         array $subscriberIds,
-        string $priority = 'transactional',
+        string $deliveryProfile = 'transactional',
         ?string $messageId = null,
         ?string $requestId = null,
     ): AMQPMessage {
         $body = [
             'bulk_request_id' => Uuid::uuid7()->toString(),
             'channel' => 'email',
-            'priority' => $priority,
+            'delivery_profile' => $deliveryProfile,
             'message' => 'Тест',
             'subscriber_ids' => $subscriberIds,
             'idempotency_key' => Uuid::uuid7()->toString(),
@@ -288,10 +288,10 @@ class BulkExpandEventHandlerTest extends TestCase
         $this->assertTrue($logCalled, 'info-лог bulk expand event processed должен быть вызван с created_count=0');
     }
 
-    public function test_unknown_priority_in_payload_routes_to_dlq(): void
+    public function test_unknown_delivery_profile_in_payload_routes_to_dlq(): void
     {
         // Payload содержит валидный по структуре, но отсутствующий в каталоге
-        // priority. handleInternal бросает InvalidBulkExpandPayloadException;
+        // delivery_profile. handleInternal бросает InvalidBulkExpandPayloadException;
         // базовый handle() логирует и делает nack(requeue=false), сообщение
         // уходит в DLQ через x-dead-letter-exchange.
         $errorLogged = false;
@@ -309,7 +309,7 @@ class BulkExpandEventHandlerTest extends TestCase
 
         $message = $this->makeMessage(
             subscriberIds: [Uuid::uuid7()->toString()],
-            priority: 'no_such_priority',
+            deliveryProfile: 'no_such_priority',
         );
 
         $this->handler->handle($message);

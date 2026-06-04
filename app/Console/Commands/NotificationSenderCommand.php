@@ -84,7 +84,7 @@ class NotificationSenderCommand extends Command
                     "queue '{$queueName}' not declared in broker, request topology change from DevOps",
                     [
                         'queue' => $queueName,
-                        'priority' => $queueOption,
+                        'delivery_profile' => $queueOption,
                         'reply_code' => $e->amqp_reply_code,
                     ],
                 );
@@ -93,7 +93,7 @@ class NotificationSenderCommand extends Command
                     'passive_declare failed: '.$e->amqp_reply_text,
                     [
                         'queue' => $queueName,
-                        'priority' => $queueOption,
+                        'delivery_profile' => $queueOption,
                         'reply_code' => $e->amqp_reply_code,
                     ],
                 );
@@ -106,7 +106,7 @@ class NotificationSenderCommand extends Command
                 'cannot probe queue: '.$e->getMessage(),
                 [
                     'queue' => $queueName,
-                    'priority' => $queueOption,
+                    'delivery_profile' => $queueOption,
                     'exception' => $e::class,
                 ],
             );

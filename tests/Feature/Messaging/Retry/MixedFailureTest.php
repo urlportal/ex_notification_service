@@ -28,7 +28,7 @@ class MixedFailureTest extends RetryTestCase
             },
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
 
         // Попытка 1: temporary -> retry на 30s, status=Queued, attempts=1.

@@ -11,7 +11,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Get(
     path: '/api/v1/subscribers/{id}/notifications',
-    description: 'Возвращает постраничный список уведомлений подписчика с опциональной фильтрацией по статусу, каналу и приоритету.',
+    description: 'Возвращает постраничный список уведомлений подписчика с опциональной фильтрацией по статусу, каналу и профилю доставки.',
     summary: 'Получить уведомления подписчика',
     security: [['bearerAuth' => []]],
     tags: ['Notifications'],
@@ -37,11 +37,11 @@ use OpenApi\Attributes as OA;
             required: false,
             schema: new OA\Schema(type: 'string', enum: ['sms', 'email'], example: 'email')
         ),
-        // Внимание: enum приоритетов дублирует config/notifications.php.
-        // При добавлении нового приоритета обновлять руками.
+        // Внимание: enum профилей доставки дублирует config/notifications.php.
+        // При добавлении нового профиля обновлять руками.
         new OA\Parameter(
-            name: 'priority',
-            description: 'Фильтр по приоритету (одно значение)',
+            name: 'delivery_profile',
+            description: 'Фильтр по профилю доставки (одно значение)',
             in: 'query',
             required: false,
             schema: new OA\Schema(type: 'string', enum: ['transactional', 'marketing'], example: 'transactional')
@@ -93,7 +93,7 @@ class IndexSubscriberNotificationsController extends Controller
     public function __invoke(IndexSubscriberNotificationsRequest $request, string $id): JsonResponse
     {
         $perPage = $request->integer('per_page', 15);
-        $filters = array_filter($request->only(['status', 'channel', 'priority']));
+        $filters = array_filter($request->only(['status', 'channel', 'delivery_profile']));
 
         $paginator = $this->service->paginateForSubscriber($id, $filters, $perPage);
 

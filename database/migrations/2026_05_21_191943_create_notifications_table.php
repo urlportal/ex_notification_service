@@ -14,7 +14,7 @@ return new class extends Migration
             $table->uuid('subscriber_id');
             $table->uuid('bulk_request_id')->nullable();
             $table->string('channel');
-            $table->string('priority');
+            $table->string('delivery_profile');
             $table->string('status');
             $table->text('message');
             $table->string('idempotency_key', 64)->nullable();

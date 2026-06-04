@@ -33,7 +33,7 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
             ->where('subscriber_id', $subscriberId)
             ->when($filters['status'] ?? null, fn ($q, $v) => $q->where('status', $v))
             ->when($filters['channel'] ?? null, fn ($q, $v) => $q->where('channel', $v))
-            ->when($filters['priority'] ?? null, fn ($q, $v) => $q->where('priority', $v))
+            ->when($filters['delivery_profile'] ?? null, fn ($q, $v) => $q->where('delivery_profile', $v))
             ->orderByDesc('created_at')
             ->paginate($perPage);
     }
@@ -92,7 +92,7 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
 
         // Статический белый список колонок. Значения передаются через bindings.
         $columns = [
-            'id', 'subscriber_id', 'bulk_request_id', 'channel', 'priority',
+            'id', 'subscriber_id', 'bulk_request_id', 'channel', 'delivery_profile',
             'status', 'message', 'idempotency_key', 'request_id',
             'queued_at', 'created_at', 'updated_at',
         ];

@@ -126,12 +126,12 @@ class BulkExpandConsumerTest extends TestCase
      * @param  list<string>  $subscriberIds
      * @return array<string, mixed>
      */
-    private function bulkExpandBody(array $subscriberIds, string $bulkRequestId, string $priority = 'transactional'): array
+    private function bulkExpandBody(array $subscriberIds, string $bulkRequestId, string $deliveryProfile = 'transactional'): array
     {
         return [
             'bulk_request_id' => $bulkRequestId,
             'channel' => 'email',
-            'priority' => $priority,
+            'delivery_profile' => $deliveryProfile,
             'message' => 'Тестовое сообщение',
             'subscriber_ids' => $subscriberIds,
             'idempotency_key' => Uuid::uuid7()->toString(),
@@ -160,7 +160,7 @@ class BulkExpandConsumerTest extends TestCase
                 'subscriber_id' => $subscriberId,
                 'bulk_request_id' => $bulkRequestId,
                 'channel' => 'email',
-                'priority' => 'transactional',
+                'delivery_profile' => 'transactional',
                 'status' => 'queued',
                 'request_id' => $requestId,
             ]);
@@ -252,7 +252,7 @@ class BulkExpandConsumerTest extends TestCase
             'subscriber_id' => $subscriberIds[0],
             'bulk_request_id' => $bulkRequestId,
             'channel' => 'email',
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             'status' => 'queued',
             'message' => 'pre-existing',
             'idempotency_key' => Uuid::uuid7()->toString(),
@@ -312,7 +312,7 @@ class BulkExpandConsumerTest extends TestCase
         $this->publishBulkExpand(
             [
                 'bulk_request_id' => Uuid::uuid7()->toString(),
-                'priority' => 'transactional',
+                'delivery_profile' => 'transactional',
                 'message' => 'missing channel',
                 'subscriber_ids' => [],
                 'idempotency_key' => Uuid::uuid7()->toString(),

@@ -137,6 +137,19 @@ services:
     networks:
       - internal
 
+  redis_commander:
+    image: 'ghcr.io/joeferner/redis-commander:0.8.0'
+    container_name: '${APP_NAME}-redis-commander'
+    ports:
+      - '8081:8081'
+    environment:
+      REDIS_HOSTS: 'local:redis:6379'
+    depends_on:
+      redis:
+        condition: 'service_healthy'
+    networks:
+      - internal
+
 networks:
   internal:
     name: "${APP_NAME}-internal"

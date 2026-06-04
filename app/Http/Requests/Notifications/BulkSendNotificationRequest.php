@@ -28,7 +28,7 @@ class BulkSendNotificationRequest extends FormRequest
         return [
             'idempotency_key' => ['required', 'uuid'],
             'channel' => ['required', 'string', Rule::in(array_column(NotificationChannel::cases(), 'value'))],
-            'priority' => ['required', 'string', Rule::in($profiles->names())],
+            'delivery_profile' => ['required', 'string', Rule::in($profiles->names())],
             'message' => ['required', 'string', 'min:1', 'max:1000'],
             'subscriber_ids' => ['required', 'array', 'min:1', 'max:'.config('notifications.bulk.max_subscribers')],
             'subscriber_ids.*' => ['required', 'uuid', 'distinct'],
@@ -39,7 +39,7 @@ class BulkSendNotificationRequest extends FormRequest
     {
         return new BulkSendNotificationDto(
             channel: NotificationChannel::from($this->string('channel')->value()),
-            priority: $this->string('priority')->value(),
+            deliveryProfile: $this->string('delivery_profile')->value(),
             message: $this->string('message')->value(),
             subscriberIds: $this->collect('subscriber_ids')->values()->all(),
             idempotencyKey: $this->string('idempotency_key')->value(),

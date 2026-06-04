@@ -19,7 +19,7 @@ class NotificationResource extends JsonResource
             'subscriber_id' => $this->resource->subscriber_id,
             'bulk_request_id' => $this->resource->bulk_request_id,
             'channel' => $this->resource->channel->value,
-            'priority' => $this->resource->priority,
+            'delivery_profile' => $this->resource->delivery_profile,
             'status' => $this->resource->status->value,
             'message' => $this->resource->message,
             'attempts' => $this->resource->attempts,

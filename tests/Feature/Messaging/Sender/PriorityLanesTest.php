@@ -15,7 +15,7 @@ class PriorityLanesTest extends SenderTestCase
         $transactionalIds = [];
         for ($i = 0; $i < 2; $i++) {
             $notification = $this->createQueuedNotification([
-                'priority' => 'transactional',
+                'delivery_profile' => 'transactional',
             ]);
             $transactionalIds[] = (string) $notification->id;
             $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
@@ -24,7 +24,7 @@ class PriorityLanesTest extends SenderTestCase
         $marketingIds = [];
         for ($i = 0; $i < 5; $i++) {
             $notification = $this->createQueuedNotification([
-                'priority' => 'marketing',
+                'delivery_profile' => 'marketing',
             ]);
             $marketingIds[] = (string) $notification->id;
             $this->publishSend((string) $notification->id, self::QUEUE_MARKETING);

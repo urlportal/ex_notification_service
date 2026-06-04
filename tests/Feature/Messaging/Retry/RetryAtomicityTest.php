@@ -24,7 +24,7 @@ class RetryAtomicityTest extends RetryTestCase
             static fn (Notification $n) => throw new TemporaryGatewayException('temp'),
         );
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
 
         $duplicateMessageId = Uuid::uuid7()->toString();
         $this->publishSend(

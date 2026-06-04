@@ -45,7 +45,7 @@ class OutboxPublishFailureTest extends RetryTestCase
             };
         });
 
-        $notification = $this->createQueuedNotification(['priority' => 'transactional']);
+        $notification = $this->createQueuedNotification(['delivery_profile' => 'transactional']);
         $messageId = $this->publishSend((string) $notification->id, self::QUEUE_TRANSACTIONAL);
 
         $this->consume('transactional', 1);

@@ -34,7 +34,7 @@ class ShowNotificationTest extends TestCase
         $notification = Notification::create([
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Email->value,
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             'status' => NotificationStatus::Delivered->value,
             'message' => 'Your order is confirmed',
             'idempotency_key' => 'key-abc-123',
@@ -47,13 +47,13 @@ class ShowNotificationTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure(['data' => [
-                'id', 'subscriber_id', 'bulk_request_id', 'channel', 'priority', 'status',
+                'id', 'subscriber_id', 'bulk_request_id', 'channel', 'delivery_profile', 'status',
                 'message', 'attempts', 'last_error', 'idempotency_key', 'provider_message_id',
                 'queued_at', 'sent_at', 'delivered_at', 'dropped_at', 'created_at', 'updated_at',
             ]])
             ->assertJsonPath('data.id', $notification->id)
             ->assertJsonPath('data.channel', 'email')
-            ->assertJsonPath('data.priority', 'transactional')
+            ->assertJsonPath('data.delivery_profile', 'transactional')
             ->assertJsonPath('data.status', 'delivered')
             ->assertJsonPath('data.idempotency_key', 'key-abc-123')
             ->assertJsonPath('data.provider_message_id', 'msg_xyz')
@@ -67,7 +67,7 @@ class ShowNotificationTest extends TestCase
         $notification = Notification::create([
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Sms->value,
-            'priority' => 'marketing',
+            'delivery_profile' => 'marketing',
             'status' => NotificationStatus::Queued->value,
             'message' => 'Hello',
         ]);

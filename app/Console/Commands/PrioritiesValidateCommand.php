@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
  * - arguments содержат x-queue-type="quorum", x-dead-letter-exchange=
  *   "notifications.dlx", любое значение x-delivery-limit;
  * - в bindings[] есть запись source="notifications.exchange",
- *   destination=<queueName>, routing_key=<priority name>.
+ *   destination=<queueName>, routing_key=<delivery_profile name>.
  *
  * Любое несоответствие (exit 1) с таблицей-отчётом.
  * Файл не найден / не парсится (exit 1).
@@ -111,7 +111,7 @@ class PrioritiesValidateCommand extends Command
             $rows[] = [$name, $queueName, $rowOk ? 'ok' : 'fail', $queueCheck, $bindingCheck];
         }
 
-        $this->table(['priority', 'queue', 'status', 'queue check', 'binding check'], $rows);
+        $this->table(['delivery_profile', 'queue', 'status', 'queue check', 'binding check'], $rows);
 
         return $hasError ? self::FAILURE : self::SUCCESS;
     }

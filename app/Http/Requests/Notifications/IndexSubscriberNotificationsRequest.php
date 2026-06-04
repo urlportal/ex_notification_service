@@ -23,7 +23,7 @@ class IndexSubscriberNotificationsRequest extends FormRequest
         return [
             'status' => ['sometimes', 'string', Rule::enum(NotificationStatus::class)],
             'channel' => ['sometimes', 'string', Rule::enum(NotificationChannel::class)],
-            'priority' => ['sometimes', 'string', Rule::in($profiles->names())],
+            'delivery_profile' => ['sometimes', 'string', Rule::in($profiles->names())],
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'page' => ['sometimes', 'integer', 'min:1'],
         ];

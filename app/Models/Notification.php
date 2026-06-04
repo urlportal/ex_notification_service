@@ -21,7 +21,7 @@ class Notification extends Model
         'subscriber_id',
         'bulk_request_id',
         'channel',
-        'priority',
+        'delivery_profile',
         'status',
         'message',
         'idempotency_key',

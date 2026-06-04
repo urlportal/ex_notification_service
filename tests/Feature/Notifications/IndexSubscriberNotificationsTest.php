@@ -37,7 +37,7 @@ class IndexSubscriberNotificationsTest extends TestCase
         return Notification::create(array_merge([
             'subscriber_id' => $subscriber->id,
             'channel' => NotificationChannel::Email->value,
-            'priority' => 'transactional',
+            'delivery_profile' => 'transactional',
             'status' => NotificationStatus::Queued->value,
             'message' => 'Test message',
         ], $attrs));
@@ -92,17 +92,17 @@ class IndexSubscriberNotificationsTest extends TestCase
             ->assertJsonPath('data.0.channel', 'sms');
     }
 
-    public function test_filters_by_priority(): void
+    public function test_filters_by_delivery_profile(): void
     {
-        $this->makeNotification($this->subscriber, ['priority' => 'marketing']);
-        $this->makeNotification($this->subscriber, ['priority' => 'transactional']);
+        $this->makeNotification($this->subscriber, ['delivery_profile' => 'marketing']);
+        $this->makeNotification($this->subscriber, ['delivery_profile' => 'transactional']);
 
         $response = $this->withHeaders($this->auth())
-            ->getJson("/api/v1/subscribers/{$this->subscriber->id}/notifications?priority=marketing");
+            ->getJson("/api/v1/subscribers/{$this->subscriber->id}/notifications?delivery_profile=marketing");
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.priority', 'marketing');
+            ->assertJsonPath('data.0.delivery_profile', 'marketing');
     }
 
     public function test_combined_filters_return_intersection(): void
@@ -236,13 +236,13 @@ class IndexSubscriberNotificationsTest extends TestCase
         $this->assertCount(3, $queries, 'Expected exactly 3 queries (subscriber lookup + COUNT + SELECT), got '.count($queries));
     }
 
-    // Фильтр priority вне DeliveryProfile отклоняется с 422.
-    public function test_unknown_priority_filter_returns_422(): void
+    // Фильтр delivery_profile вне DeliveryProfile отклоняется с 422.
+    public function test_unknown_delivery_profile_filter_returns_422(): void
     {
         $response = $this->withHeaders($this->auth())
-            ->getJson("/api/v1/subscribers/{$this->subscriber->id}/notifications?priority=no_such_priority");
+            ->getJson("/api/v1/subscribers/{$this->subscriber->id}/notifications?delivery_profile=no_such_profile");
 
         $response->assertStatus(422)
-            ->assertJsonStructure(['errors' => ['priority']]);
+            ->assertJsonStructure(['errors' => ['delivery_profile']]);
     }
 }
