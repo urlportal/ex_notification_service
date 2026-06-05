@@ -3,6 +3,7 @@ set -e
 
 DATABASES=(
     "${NOTIFY_DB}:${NOTIFY_USER}:${NOTIFY_PASSWORD}"
+    "${NOTIFY_TEST_DB}:${NOTIFY_USER}:${NOTIFY_PASSWORD}"
 )
 
 create_user_and_database() {
@@ -38,6 +39,10 @@ EOSQL
 
 for item in "${DATABASES[@]}"; do
     IFS=":" read -r db_name user_name db_password <<< "$item"
+
+    if [ -z "$db_name" ]; then
+        continue
+    fi
 
     create_user_and_database "$db_name" "$user_name" "$db_password"
 done
