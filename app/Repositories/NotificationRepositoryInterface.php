@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Enums\NotificationChannel;
 use App\Models\Notification;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface NotificationRepositoryInterface
 {
@@ -88,4 +89,26 @@ interface NotificationRepositoryInterface
         int $attempts,
         string $lastError,
     ): void;
+
+    /**
+     * Выбирает батч уведомлений, застрявших в retry очереди (с блокировкой строк).
+     * Критерии: status=queued, attempts > 0, updated_at < $stuckBefore.
+     * Самые старые записи идут первыми, строки, заблокированные другим процессом, пропускаются.
+     *
+     * @param  string[]  $excludeIds  Идентификаторы, которые не нужно выбирать (например, упавшие в текущем запуске).
+     * @return Collection<int, Notification>
+     */
+    public function findStuckBatchForUpdate(\DateTimeImmutable $stuckBefore, int $batchSize, array $excludeIds = []): Collection;
+
+    /**
+     * Обновляет updated_at уведомления до текущего момента.
+     * Вызывается после постановки в outbox, чтобы повторный sweep пропустил запись.
+     */
+    public function touchForRescue(string $id): void;
+
+    /**
+     * Считает число уведомлений, соответствующих критериям застревания: status=queued,
+     * attempts > 0, updated_at < $stuckBefore. Используется для подсчёта пропущенных.
+     */
+    public function countStuck(\DateTimeImmutable $stuckBefore): int;
 }

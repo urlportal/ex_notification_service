@@ -8,6 +8,7 @@ use App\Exceptions\NotFoundException;
 use App\Models\Notification;
 use App\Repositories\NotificationRepositoryInterface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class EloquentNotificationRepository implements NotificationRepositoryInterface
@@ -170,5 +171,37 @@ class EloquentNotificationRepository implements NotificationRepositoryInterface
             'last_error' => $lastError,
             'updated_at' => now(),
         ]);
+    }
+
+    /**
+     * @return Collection<int, Notification>
+     */
+    public function findStuckBatchForUpdate(\DateTimeImmutable $stuckBefore, int $batchSize, array $excludeIds = []): Collection
+    {
+        return Notification::query()
+            ->where('status', NotificationStatus::Queued->value)
+            ->where('attempts', '>', 0)
+            ->where('updated_at', '<', $stuckBefore->format('Y-m-d H:i:s'))
+            ->when($excludeIds !== [], fn ($query) => $query->whereNotIn('id', $excludeIds))
+            ->orderBy('updated_at')
+            ->lock('FOR UPDATE SKIP LOCKED')
+            ->limit($batchSize)
+            ->get();
+    }
+
+    public function touchForRescue(string $id): void
+    {
+        Notification::query()->whereKey($id)->update([
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function countStuck(\DateTimeImmutable $stuckBefore): int
+    {
+        return Notification::query()
+            ->where('status', NotificationStatus::Queued->value)
+            ->where('attempts', '>', 0)
+            ->where('updated_at', '<', $stuckBefore->format('Y-m-d H:i:s'))
+            ->count();
     }
 }

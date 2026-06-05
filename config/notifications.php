@@ -59,6 +59,23 @@ return [
         ],
     ],
 
+    // Rescue sweep: периодическое восстановление уведомлений, потерявшихся из retry-очереди.
+    // threshold_minutes: null = автовычисление в RescueSweepConfigServiceProvider как
+    //   max(retry.levels.*.ttl_ms / 60000) + 15 мин. При явном задании через ENV значение
+    //   должно превышать max TTL retry-очередей, иначе приложение не стартует.
+    // batch_size: сколько записей выбирается из БД за одну итерацию цикла sweep.
+    // max_process: максимальное число уведомлений, обрабатываемых за один запуск команды.
+    // schedule_minutes: интервал запуска по расписанию Laravel Scheduler.
+    //   Допустимы только делители 60 (1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60), иначе приложение не стартует.
+    'rescue_sweep' => [
+        'threshold_minutes' => env('RESCUE_SWEEP_THRESHOLD_MINUTES') !== null
+            ? (int) env('RESCUE_SWEEP_THRESHOLD_MINUTES')
+            : null,
+        'batch_size' => (int) env('RESCUE_SWEEP_BATCH_SIZE', 10),
+        'max_process' => (int) env('RESCUE_SWEEP_MAX_PROCESS', 50),
+        'schedule_minutes' => (int) env('RESCUE_SWEEP_SCHEDULE_MINUTES', 15),
+    ],
+
     // Реестр адаптеров входящих webhook от провайдеров сообщений.
     // Ключ массива - имя адаптера (используется как path-параметр {adapter} в URL).
     // channel - канал доставки (sms/email), authenticator - класс проверки подлинности,

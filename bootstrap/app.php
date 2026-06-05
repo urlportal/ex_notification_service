@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\NotificationRescueSweepCommand;
 use App\Exceptions\AlreadyExistsException;
 use App\Exceptions\Callbacks\InvalidCallbackPayloadException;
 use App\Exceptions\Callbacks\InvalidCallbackSignatureException;
@@ -10,6 +11,7 @@ use App\Http\Middleware\ApiTokenAuth;
 use App\Http\Middleware\AssignRequestId;
 use App\Http\Middleware\EnsureNotProduction;
 use App\Http\Middleware\VerifyCallbackSignature;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +26,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function (Schedule $schedule): void {
+        // Значение уже проверено в RescueSweepConfigServiceProvider: это делитель 60
+        $intervalMinutes = (int) config('notifications.rescue_sweep.schedule_minutes', 15);
+        $schedule->command(NotificationRescueSweepCommand::class)
+            ->cron($intervalMinutes === 60 ? '0 * * * *' : "*/{$intervalMinutes} * * * *")
+            ->withoutOverlapping()
+            ->runInBackground();
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(AssignRequestId::class);
         $middleware->alias([
